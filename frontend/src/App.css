@@ -9,6 +9,21 @@ body {
     padding: 0;
 }
 
+/* Hero Background Image */
+.hero-with-bg {
+    position: relative;
+    min-height: 100vh;
+}
+
+.hero-bg-image {
+    background-image: url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: grayscale(100%) contrast(1.1);
+    opacity: 0.4;
+}
+
 /* Custom scrollbar for webkit browsers */
 ::-webkit-scrollbar {
     width: 10px;
