@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - BeatMarket</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .catalog-section { padding-top: 100px; min-height: 100vh; }
+        .catalog-header { margin-bottom: 3rem; }
+        .page-title { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; }
+        .page-subtitle { font-size: 1.125rem; color: #9ca3af; }
+        .filters { margin-bottom: 2rem; }
+        .search-box { position: relative; margin-bottom: 1rem; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+        .search-input { width: 100%; padding: 12px 12px 12px 40px; background: #18181b; border: 1px solid rgba(220,38,38,0.2); border-radius: 8px; color: white; font-size: 1rem; }
+        .search-input::placeholder { color: #6b7280; }
+        .genre-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+        .filter-icon { color: #9ca3af; }
+        .genre-btn { padding: 0.5rem 1rem; background: transparent; color: #9ca3af; border: 1px solid rgba(220,38,38,0.2); border-radius: 6px; cursor: pointer; font-size: 0.875rem; transition: all 0.2s; }
+        .genre-btn:hover { border-color: #dc2626; color: white; }
+        .genre-btn.active { background: #dc2626; color: white; border-color: #dc2626; }
+        .sort-filter { display: flex; align-items: center; gap: 0.5rem; }
+        .sort-label { color: #9ca3af; font-size: 0.875rem; }
+        .sort-select { padding: 0.5rem 0.75rem; background: #18181b; border: 1px solid rgba(220,38,38,0.2); border-radius: 6px; color: white; font-size: 0.875rem; }
+        .results-count { margin-bottom: 1.5rem; color: #9ca3af; }
+        .beats-grid-catalog { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .beat-genre-badge { position: absolute; top: 8px; right: 8px; padding: 4px 12px; background: rgba(0,0,0,0.8); color: #fca5a5; font-size: 0.75rem; border-radius: 9999px; border: 1px solid rgba(220,38,38,0.3); }
+        .beat-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.75rem; }
+        .beat-plays { font-size: 0.75rem; color: #9ca3af; margin-bottom: 1rem; }
+        .beat-from { font-size: 0.75rem; color: #9ca3af; display: block; }
+        .no-results { display: none; flex-direction: column; align-items: center; padding: 5rem 1rem; }
+        .no-results-icon { width: 64px; height: 64px; color: #4b5563; margin-bottom: 1rem; }
+        .no-results h3 { font-size: 1.25rem; color: #9ca3af; margin-bottom: 0.5rem; }
+        .no-results p { color: #6b7280; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                    </div>
+                    <span class="logo-text">BeatMarket</span>
+                </a>
+                <nav class="nav-desktop">
+                    <a href="index.html" class="nav-link">Inicio</a>
+                    <a href="catalogo.html" class="nav-link active">Catálogo</a>
+                    <a href="licencias.html" class="nav-link">Licencias</a>
+                    <a href="admin.html" class="nav-link">Admin</a>
+                </nav>
+                <button class="btn-outline btn-cart">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    Carrito (0)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="catalog-section">
+        <div class="container">
+            <div class="catalog-header">
+                <h1 class="page-title">Catálogo de Beats</h1>
+                <p class="page-subtitle">Explora <span id="totalBeats">8</span> beats profesionales listos para usar</p>
+            </div>
+
+            <div class="filters">
+                <div class="search-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="search-icon">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre o género..." class="search-input">
+                </div>
+
+                <div class="genre-filters">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="filter-icon">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <button class="genre-btn active" data-genre="all">Todos</button>
+                    <button class="genre-btn" data-genre="Trap">Trap</button>
+                    <button class="genre-btn" data-genre="Reggaeton">Reggaeton</button>
+                    <button class="genre-btn" data-genre="R&B">R&B</button>
+                    <button class="genre-btn" data-genre="Hip Hop">Hip Hop</button>
+                    <button class="genre-btn" data-genre="Drill">Drill</button>
+                    <button class="genre-btn" data-genre="Lo-Fi">Lo-Fi</button>
+                    <button class="genre-btn" data-genre="Afrobeat">Afrobeat</button>
+                </div>
+
+                <div class="sort-filter">
+                    <span class="sort-label">Ordenar por:</span>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="recent">Más recientes</option>
+                        <option value="popular">Más populares</option>
+                        <option value="price-low">Precio: Menor a Mayor</option>
+                        <option value="price-high">Precio: Mayor a Menor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="results-count">
+                <p>Mostrando <span id="resultsCount">8</span> beats</p>
+            </div>
+
+            <div class="beats-grid-catalog" id="beatsGrid"></div>
+
+            <div id="noResults" class="no-results">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="no-results-icon">
+                    <path d="M9 18V5l12-2v13"></path>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+                <h3>No se encontraron beats</h3>
+                <p>Intenta con otros filtros o términos de búsqueda</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2025 BeatMarket. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="mock-data.js"></script>
+    <script>
+        let currentBeats = [...mockBeats];
+        let selectedGenre = 'all';
+        let searchTerm = '';
+        let sortBy = 'recent';
+
+        function filterAndSort() {
+            let filtered = mockBeats.filter(beat => {
+                const matchesSearch = beat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                     beat.genre.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesGenre = selectedGenre === 'all' || beat.genre === selectedGenre;
+                return matchesSearch && matchesGenre;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortBy === 'price-low') return a.prices.basica - b.prices.basica;
+                if (sortBy === 'price-high') return b.prices.basica - a.prices.basica;
+                if (sortBy === 'popular') return b.plays - a.plays;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+
+            currentBeats = filtered;
+            renderBeats();
+        }
+
+        function renderBeats() {
+            const container = document.getElementById('beatsGrid');
+            const noResults = document.getElementById('noResults');
+            const resultsCount = document.getElementById('resultsCount');
+
+            resultsCount.textContent = currentBeats.length;
+
+            if (currentBeats.length === 0) {
+                container.style.display = 'none';
+                noResults.style.display = 'flex';
+            } else {
+                container.style.display = 'grid';
+                noResults.style.display = 'none';
+
+                container.innerHTML = currentBeats.map(beat => `
+                    <div class="beat-card">
+                        <div class="beat-image-container">
+                            <img src="${beat.coverImage}" alt="${beat.name}" class="beat-image">
+                            <span class="beat-genre-badge">${beat.genre}</span>
+                            <div class="beat-overlay">
+                                <button class="btn-play">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    Preview
+                                </button>
+                            </div>
+                        </div>
+                        <div class="beat-content">
+                            <h3 class="beat-title">${beat.name}</h3>
+                            <div class="beat-meta">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M9 18V5l12-2v13"></path>
+                                    <circle cx="6" cy="18" r="3"></circle>
+                                    <circle cx="18" cy="16" r="3"></circle>
+                                </svg>
+                                <span>${beat.bpm} BPM</span>
+                                <span>•</span>
+                                <span>${beat.key}</span>
+                            </div>
+                            <div class="beat-plays">
+                                <span>${beat.plays.toLocaleString()} plays</span>
+                            </div>
+                            <div class="beat-footer">
+                                <div>
+                                    <span class="beat-from">Desde</span>
+                                    <div class="beat-price">$${beat.prices.basica}</div>
+                                </div>
+                                <a href="beat-detail.html?id=${beat.id}" class="btn-primary btn-sm">
+                                    Ver Más
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            filterAndSort();
+        });
+
+        document.querySelectorAll('.genre-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                selectedGenre = e.target.dataset.genre;
+                filterAndSort();
+            });
+        });
+
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            filterAndSort();
+        });
+
+        renderBeats();
+    </script>
+</body>
+</html>
