@@ -259,9 +259,9 @@ html {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    filter: grayscale(100%) blur(8px) contrast(1.2) brightness(0.7);
+    filter: grayscale(100%) blur(2px) contrast(1.2) brightness(0.7);
     opacity: 0.6;
-    transform: scale(1.1);
+    transform: scale(1.05);
     z-index: 0;
 }
 
