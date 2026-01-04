@@ -653,7 +653,7 @@ html {
 .footer {
     background: #000000;
     border-top: 1px solid rgba(220, 38, 38, 0.2);
-    margin-top: 5rem;
+    margin-top: 0;
 }
 
 .footer .container {
