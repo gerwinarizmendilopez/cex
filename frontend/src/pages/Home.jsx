@@ -124,7 +124,7 @@ export const Home = () => {
       </section>
 
       {/* Value Props */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 value-props">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Por qué estos beats son diferentes</h2>
