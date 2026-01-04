@@ -11,8 +11,9 @@ export const Home = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-red-950/20 to-black pointer-events-none" />
+      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden hero-with-bg">
+        <div className="absolute inset-0 hero-bg-image"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black pointer-events-none" />
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center px-4 py-2 bg-red-600/10 border border-red-600/20 rounded-full mb-6">
