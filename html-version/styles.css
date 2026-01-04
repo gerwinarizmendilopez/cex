@@ -380,7 +380,7 @@ html {
 /* Featured Beats */
 .featured-beats {
     padding: 5rem 1rem;
-    background: linear-gradient(to bottom, #000000, rgba(69, 10, 10, 0.05));
+    background: #000000;
 }
 
 .section-header {
