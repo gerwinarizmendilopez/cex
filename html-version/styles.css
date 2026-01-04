@@ -525,6 +525,26 @@ html {
 /* Value Props */
 .value-props {
     padding: 5rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.value-props::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('https://customer-assets.emergentagent.com/job_beatmarket-43/artifacts/etubvkn4_syn.PNG');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(1px) brightness(0.3);
+    opacity: 0.5;
+    z-index: 0;
+}
+
+.value-props > * {
+    position: relative;
+    z-index: 1;
 }
 
 .text-center {
