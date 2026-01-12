@@ -23,6 +23,8 @@ export const Home = () => {
             
             <h1 className="md:text-7xl !font-bold !text-5xl mb-6">
               
+              
+              
               <span className="text-red-600"></span>
             </h1>
             
@@ -66,12 +68,10 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredBeats.map((beat) =>
-            <Card key={beat.id} className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all group">
+            {featuredBeats.map((beat) => <Card key={beat.id} className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all group">
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden">
-                    <img
-                    src={beat.coverImage}
+                    <img src={beat.coverImage}
                     alt={beat.name}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
 
