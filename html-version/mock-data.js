@@ -3,7 +3,7 @@ const mockBeats = [
   {
     id: '1',
     name: 'Fire Trap',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 140,
     key: 'C Minor',
     mood: 'Agresivo',
@@ -24,7 +24,7 @@ const mockBeats = [
   {
     id: '2',
     name: 'Reggaeton Caliente',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 95,
     key: 'A Minor',
     mood: 'Energético',
@@ -45,7 +45,7 @@ const mockBeats = [
   {
     id: '3',
     name: 'Smooth R&B Vibes',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 75,
     key: 'G Major',
     mood: 'Romántico',
@@ -66,7 +66,7 @@ const mockBeats = [
   {
     id: '4',
     name: 'Dark Drill',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 145,
     key: 'D Minor',
     mood: 'Oscuro',
@@ -87,7 +87,7 @@ const mockBeats = [
   {
     id: '5',
     name: 'Boom Bap Classic',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 90,
     key: 'E Minor',
     mood: 'Old School',
@@ -108,7 +108,7 @@ const mockBeats = [
   {
     id: '6',
     name: 'Melodic Trap',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 138,
     key: 'F# Minor',
     mood: 'Melódico',
@@ -129,7 +129,7 @@ const mockBeats = [
   {
     id: '7',
     name: 'Afrobeat Summer',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 110,
     key: 'C Major',
     mood: 'Alegre',
@@ -150,7 +150,7 @@ const mockBeats = [
   {
     id: '8',
     name: 'Lo-Fi Chill',
-    producer: 'SONIDOS JUAN CARLOS',
+    producer: 'V CLUB',
     bpm: 85,
     key: 'B♭ Major',
     mood: 'Relajado',
