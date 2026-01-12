@@ -29,24 +29,6 @@ export const Home = () => {
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
               Descarga beats listos para lanzar, monetizar y llevar tu carrera al siguiente nivel. Calidad de estudio, licencias claras, descarga inmediata.
             </p>
-            
-            <div className="">
-              <Link to="/catalogo">
-                <Button size="lg" className="">
-                  <Play className="w-5 h-5 mr-2" />
-                  
-                </Button>
-              </Link>
-              <Link to="/licencias">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="">
-
-
-                </Button>
-              </Link>
-            </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-16 max-w-2xl mx-auto">
