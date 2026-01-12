@@ -13,7 +13,7 @@ export const Footer = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center">
                 <Music className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">SONIDOS JUAN CARLOS</span>
+              <span className="text-xl font-bold text-white">V CLUB</span>
             </div>
             <p className="text-gray-400 text-sm mb-4">
               Beats profesionales listos para llevar tu música al siguiente nivel.
