@@ -4,7 +4,7 @@ export const mockBeats = [
   {
     id: '1',
     name: 'Fire Trap',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 140,
     key: 'C Minor',
     mood: 'Agresivo',
@@ -25,7 +25,7 @@ export const mockBeats = [
   {
     id: '2',
     name: 'Reggaeton Caliente',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 95,
     key: 'A Minor',
     mood: 'Energético',
@@ -46,7 +46,7 @@ export const mockBeats = [
   {
     id: '3',
     name: 'Smooth R&B Vibes',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 75,
     key: 'G Major',
     mood: 'Romántico',
@@ -67,7 +67,7 @@ export const mockBeats = [
   {
     id: '4',
     name: 'Dark Drill',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 145,
     key: 'D Minor',
     mood: 'Oscuro',
@@ -88,7 +88,7 @@ export const mockBeats = [
   {
     id: '5',
     name: 'Boom Bap Classic',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 90,
     key: 'E Minor',
     mood: 'Old School',
@@ -109,7 +109,7 @@ export const mockBeats = [
   {
     id: '6',
     name: 'Melodic Trap',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 138,
     key: 'F# Minor',
     mood: 'Melódico',
@@ -130,7 +130,7 @@ export const mockBeats = [
   {
     id: '7',
     name: 'Afrobeat Summer',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 110,
     key: 'C Major',
     mood: 'Alegre',
@@ -151,7 +151,7 @@ export const mockBeats = [
   {
     id: '8',
     name: 'Lo-Fi Chill',
-    producer: 'BeatMaker Pro',
+    producer: 'SONIDOS JUAN CARLOS',
     bpm: 85,
     key: 'B♭ Major',
     mood: 'Relajado',
