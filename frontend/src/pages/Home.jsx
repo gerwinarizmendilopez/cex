@@ -30,20 +30,20 @@ export const Home = () => {
               Descarga beats listos para lanzar, monetizar y llevar tu carrera al siguiente nivel. Calidad de estudio, licencias claras, descarga inmediata.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="">
               <Link to="/catalogo">
-                <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white px-8 py-6 text-lg">
+                <Button size="lg" className="">
                   <Play className="w-5 h-5 mr-2" />
-                  Escuchar Beats
+                  
                 </Button>
               </Link>
               <Link to="/licencias">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white px-8 py-6 text-lg"
-                >
-                  Ver Licencias
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="">
+
+
                 </Button>
               </Link>
             </div>
@@ -84,15 +84,15 @@ export const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredBeats.map((beat) => (
-              <Card key={beat.id} className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all group">
+            {featuredBeats.map((beat) =>
+            <Card key={beat.id} className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all group">
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden">
-                    <img 
-                      src={beat.coverImage} 
-                      alt={beat.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    <img
+                    src={beat.coverImage}
+                    alt={beat.name}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Button size="lg" className="bg-red-600 hover:bg-red-700">
                         <Play className="w-5 h-5 mr-2" />
@@ -118,7 +118,7 @@ export const Home = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -185,6 +185,6 @@ export const Home = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 };
