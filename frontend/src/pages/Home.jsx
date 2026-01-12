@@ -21,9 +21,9 @@ export const Home = () => {
               <span className="text-sm text-red-400 font-medium">100+ Beats Profesionales</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Beats que te hacen
-              <span className="text-red-600"> ganar dinero</span>
+            <h1 className="md:text-7xl !font-bold !text-5xl mb-6">
+              
+              <span className="text-red-600"></span>
             </h1>
             
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
