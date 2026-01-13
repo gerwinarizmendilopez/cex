@@ -103,14 +103,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    // Solo limpiar el token de sesión, NO el carrito
+    // Limpiar el token de sesión
     localStorage.removeItem('home_token');
     
     setToken(null);
     setUser(null);
     
-    // Recargar la página para limpiar el estado de usuario
-    window.location.reload();
+    // El carrito se limpiará automáticamente porque CartContext 
+    // depende del estado de autenticación
   };
 
   return (
