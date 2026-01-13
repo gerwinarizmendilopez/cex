@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     
     setToken(access_token);
     setUser(userData);
-    localStorage.setItem('vclub_token', access_token);
+    localStorage.setItem('home_token', access_token);
     
     return userData;
   };
