@@ -12,12 +12,12 @@ export const Footer = () => {
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-10 h-10 flex items-center justify-center">
                 <img 
-                  src="https://customer-assets.emergentagent.com/job_beatmarket-43/artifacts/7mofy2kc_holaaaa.png" 
-                  alt="V CLUB Logo" 
+                  src="https://customer-assets.emergentagent.com/job_beatmarket-43/artifacts/nqptbjvc_Sin%20t%C3%ADtulo-1-Recuperado-Recuperado%20%281%29.png" 
+                  alt="HØME Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span className="text-xl font-bold text-white">V CLUB</span>
+              <span className="text-xl font-bold text-white">HØME</span>
             </div>
             <p className="text-gray-400 text-sm mb-4">
               Beats profesionales listos para llevar tu música al siguiente nivel.
