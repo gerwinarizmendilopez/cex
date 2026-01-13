@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from routes.payment import router as payment_router
 from routes.auth import router as auth_router
 from routes.beats import router as beats_router
+from routes.cart import router as cart_router
 
 
 ROOT_DIR = Path(__file__).parent
