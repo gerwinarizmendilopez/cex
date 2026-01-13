@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Music, ShoppingCart, Menu, X } from 'lucide-react';
 import { Button } from './ui/button';
+import { useCart } from '../context/CartContext';
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
