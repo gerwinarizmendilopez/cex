@@ -66,19 +66,23 @@ async def upload_beat(
     price_premium: float = Form(...),
     price_exclusiva: float = Form(...),
     audio_file: UploadFile = File(...),
-    cover_file: UploadFile = File(...)
+    cover_file: UploadFile = File(...),
+    wav_file: Optional[UploadFile] = File(None),
+    stems_file: Optional[UploadFile] = File(None)
 ):
-    """Subir un nuevo beat con archivo de audio e imagen de portada"""
+    """Subir un nuevo beat con archivo de audio, WAV, stems e imagen de portada"""
     
     # Validar tipos de archivo
-    audio_extensions = ['.mp3', '.wav']
+    audio_extensions = ['.mp3']
+    wav_extensions = ['.wav']
+    stems_extensions = ['.rar', '.zip']
     image_extensions = ['.png', '.jpg', '.jpeg', '.webp']
     
     audio_ext = Path(audio_file.filename).suffix.lower()
     cover_ext = Path(cover_file.filename).suffix.lower()
     
     if audio_ext not in audio_extensions:
-        raise HTTPException(status_code=400, detail="Formato de audio no válido. Use MP3 o WAV.")
+        raise HTTPException(status_code=400, detail="Formato de audio no válido. Use MP3 para el archivo de exhibición.")
     
     if cover_ext not in image_extensions:
         raise HTTPException(status_code=400, detail="Formato de imagen no válido. Use PNG, JPG o WEBP.")
@@ -86,7 +90,7 @@ async def upload_beat(
     # Generar ID único para el beat
     beat_id = f"beat_{uuid.uuid4().hex[:12]}"
     
-    # Guardar archivo de audio
+    # Guardar archivo de audio MP3 (exhibición y básica)
     audio_filename = f"{beat_id}{audio_ext}"
     audio_path = AUDIO_DIR / audio_filename
     
@@ -99,6 +103,28 @@ async def upload_beat(
     
     with open(cover_path, "wb") as buffer:
         shutil.copyfileobj(cover_file.file, buffer)
+    
+    # Guardar archivo WAV si existe (premium y exclusiva)
+    wav_filename = None
+    if wav_file and wav_file.filename:
+        wav_ext = Path(wav_file.filename).suffix.lower()
+        if wav_ext not in wav_extensions:
+            raise HTTPException(status_code=400, detail="Formato WAV no válido.")
+        wav_filename = f"{beat_id}{wav_ext}"
+        wav_path = WAV_DIR / wav_filename
+        with open(wav_path, "wb") as buffer:
+            shutil.copyfileobj(wav_file.file, buffer)
+    
+    # Guardar archivo de stems si existe (solo exclusiva)
+    stems_filename = None
+    if stems_file and stems_file.filename:
+        stems_ext = Path(stems_file.filename).suffix.lower()
+        if stems_ext not in stems_extensions:
+            raise HTTPException(status_code=400, detail="Formato de stems no válido. Use RAR o ZIP.")
+        stems_filename = f"{beat_id}_stems{stems_ext}"
+        stems_path = STEMS_DIR / stems_filename
+        with open(stems_path, "wb") as buffer:
+            shutil.copyfileobj(stems_file.file, buffer)
     
     # Crear documento del beat
     beat_doc = {
@@ -113,6 +139,8 @@ async def upload_beat(
         "price_exclusiva": price_exclusiva,
         "audio_filename": audio_filename,
         "cover_filename": cover_filename,
+        "wav_filename": wav_filename,
+        "stems_filename": stems_filename,
         "plays": 0,
         "sales": 0,
         "is_available": True,
