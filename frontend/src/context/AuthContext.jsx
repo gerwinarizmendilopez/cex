@@ -17,7 +17,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(() => localStorage.getItem('vclub_token'));
+  const [token, setToken] = useState(() => localStorage.getItem('home_token'));
 
   useEffect(() => {
     if (token) {
