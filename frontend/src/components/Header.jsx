@@ -8,9 +8,8 @@ import { useAuth } from '../context/AuthContext';
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { getCartCount } = useCart();
+  const { cartCount } = useCart();
   const { user, logout } = useAuth();
-  const cartCount = getCartCount();
 
   const isActive = (path) => location.pathname === path;
 
