@@ -30,11 +30,17 @@ export const Admin = () => {
   
   const [audioFile, setAudioFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
+  const [wavFile, setWavFile] = useState(null);
+  const [stemsFile, setStemsFile] = useState(null);
   const [audioPreview, setAudioPreview] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
+  const [wavPreview, setWavPreview] = useState(null);
+  const [stemsPreview, setStemsPreview] = useState(null);
   
   const audioInputRef = useRef(null);
   const coverInputRef = useRef(null);
+  const wavInputRef = useRef(null);
+  const stemsInputRef = useRef(null);
 
   useEffect(() => {
     fetchBeats();
