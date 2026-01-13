@@ -104,6 +104,9 @@ class ConfirmPaymentRequest(BaseModel):
     license_type: str
     buyer_email: EmailStr
     buyer_name: str = ""
+    buyer_phone: str = ""
+    account_type: str = "individual"
+    accept_promos: bool = False
 
 
 @router.post("/confirm-payment")
