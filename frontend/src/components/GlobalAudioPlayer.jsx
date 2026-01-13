@@ -45,12 +45,6 @@ export const GlobalAudioPlayer = () => {
     seek(Math.max(0, Math.min(newTime, duration)));
   }, [duration, seek]);
 
-  // Manejar drag en la barra de progreso
-  const handleProgressDrag = useCallback((e) => {
-    if (e.buttons !== 1) return; // Solo si el botón izquierdo está presionado
-    handleProgressClick(e);
-  }, [handleProgressClick]);
-
   // Manejar click en la barra de volumen
   const handleVolumeClick = useCallback((e) => {
     if (!volumeBarRef.current) return;
