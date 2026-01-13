@@ -33,6 +33,12 @@ export const BeatDetail = () => {
     });
   };
 
+  const handleAddToCart = () => {
+    addToCart(beat, selectedLicense);
+  };
+
+  const inCart = isInCart(beat.id, selectedLicense);
+
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
