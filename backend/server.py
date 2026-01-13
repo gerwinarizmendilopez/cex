@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 
 # Import payment routes
 from routes.payment import router as payment_router
+from routes.auth import router as auth_router
 
 
 ROOT_DIR = Path(__file__).parent
