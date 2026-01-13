@@ -42,6 +42,8 @@ class BeatResponse(BaseModel):
     price_exclusiva: float
     audio_url: str
     cover_url: str
+    wav_url: Optional[str] = None
+    stems_url: Optional[str] = None
     plays: int = 0
     sales: int = 0
     created_at: str
