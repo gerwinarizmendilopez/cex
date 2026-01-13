@@ -80,6 +80,9 @@ app.include_router(payment_router)
 # Include auth routes
 app.include_router(auth_router)
 
+# Include beats routes
+app.include_router(beats_router)
+
 # Configure CORS - orígenes específicos para credentials
 cors_origins = os.environ.get('CORS_ORIGINS', '').split(',')
 # Filtrar strings vacíos y agregar orígenes comunes
