@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
+import WaveSurfer from 'wavesurfer.js';
 
 const AudioPlayerContext = createContext();
 
@@ -15,130 +16,124 @@ export const AudioPlayerProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(0.8);
+  const [isReady, setIsReady] = useState(false);
   
-  const audioRef = useRef(null);
-  const isSeekingRef = useRef(false); // Usar ref en lugar de state
+  const wavesurferRef = useRef(null);
+  const containerRef = useRef(null);
 
-  useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
-    audio.volume = volume;
+  // Inicializar WaveSurfer cuando el container esté listo
+  const initWaveSurfer = useCallback((container) => {
+    if (!container || wavesurferRef.current) return;
     
-    const handleTimeUpdate = () => {
-      // NO actualizar si el usuario está arrastrando el slider
-      if (!isSeekingRef.current) {
-        setCurrentTime(audio.currentTime);
-      }
-    };
+    containerRef.current = container;
     
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-    };
+    const ws = WaveSurfer.create({
+      container: container,
+      waveColor: '#4a4a4a',
+      progressColor: '#dc2626',
+      cursorColor: '#fff',
+      cursorWidth: 2,
+      barWidth: 3,
+      barGap: 2,
+      barRadius: 3,
+      height: 50,
+      normalize: true,
+      backend: 'WebAudio',
+    });
     
-    const handleEnded = () => {
+    ws.on('ready', () => {
+      setDuration(ws.getDuration());
+      setIsReady(true);
+      ws.setVolume(volume);
+    });
+    
+    ws.on('audioprocess', () => {
+      setCurrentTime(ws.getCurrentTime());
+    });
+    
+    ws.on('seeking', () => {
+      setCurrentTime(ws.getCurrentTime());
+    });
+    
+    ws.on('finish', () => {
       setIsPlaying(false);
       setCurrentTime(0);
-    };
+    });
     
-    const handleError = (e) => {
-      console.error('Audio error:', e);
-      setIsPlaying(false);
-    };
+    ws.on('play', () => setIsPlaying(true));
+    ws.on('pause', () => setIsPlaying(false));
     
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-    
+    wavesurferRef.current = ws;
+  }, [volume]);
+
+  // Cleanup
+  useEffect(() => {
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      audio.pause();
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+        wavesurferRef.current = null;
+      }
     };
-  }, []); // Sin dependencias - solo se ejecuta una vez
+  }, []);
 
   const playBeat = useCallback(async (beat, audioUrl) => {
-    const audio = audioRef.current;
+    const ws = wavesurferRef.current;
+    if (!ws) return;
     
+    // Si es el mismo beat, toggle play/pause
     if (currentBeat?.beat_id === beat.beat_id) {
-      if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-      } else {
-        await audio.play();
-        setIsPlaying(true);
-      }
+      ws.playPause();
       return;
     }
     
+    // Nuevo beat
     setCurrentBeat(beat);
-    audio.src = audioUrl;
+    setIsReady(false);
     setCurrentTime(0);
     setDuration(0);
     
     try {
-      await audio.play();
-      setIsPlaying(true);
+      await ws.load(audioUrl);
+      ws.play();
     } catch (error) {
-      console.error('Error playing audio:', error);
-      setIsPlaying(false);
+      console.error('Error loading audio:', error);
     }
-  }, [currentBeat, isPlaying]);
+  }, [currentBeat]);
 
-  const togglePlayPause = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!currentBeat) return;
-    
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      await audio.play();
-      setIsPlaying(true);
+  const togglePlayPause = useCallback(() => {
+    const ws = wavesurferRef.current;
+    if (ws && isReady) {
+      ws.playPause();
     }
-  }, [currentBeat, isPlaying]);
+  }, [isReady]);
 
-  // Iniciar seeking
-  const startSeeking = useCallback(() => {
-    isSeekingRef.current = true;
-  }, []);
-
-  // Hacer seek real al audio
   const seek = useCallback((time) => {
-    const audio = audioRef.current;
-    if (audio && !isNaN(time) && audio.duration) {
-      const clampedTime = Math.max(0, Math.min(time, audio.duration));
-      audio.currentTime = clampedTime;
-      setCurrentTime(clampedTime);
+    const ws = wavesurferRef.current;
+    if (ws && duration > 0) {
+      ws.seekTo(time / duration);
     }
-    isSeekingRef.current = false;
-  }, []);
-
-  // Actualizar tiempo visual mientras se arrastra
-  const updateSeekTime = useCallback((time) => {
-    setCurrentTime(time);
-  }, []);
+  }, [duration]);
 
   const changeVolume = useCallback((newVolume) => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = newVolume;
-      setVolume(newVolume);
+    setVolume(newVolume);
+    const ws = wavesurferRef.current;
+    if (ws) {
+      ws.setVolume(newVolume);
     }
   }, []);
 
   const stopPlayback = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
+    const ws = wavesurferRef.current;
+    if (ws) {
+      ws.stop();
+      ws.empty();
     }
     setIsPlaying(false);
     setCurrentTime(0);
+    setDuration(0);
     setCurrentBeat(null);
+    setIsReady(false);
   }, []);
 
   return (
@@ -149,13 +144,14 @@ export const AudioPlayerProvider = ({ children }) => {
         currentTime,
         duration,
         volume,
+        isReady,
         playBeat,
         togglePlayPause,
-        startSeeking,
         seek,
-        updateSeekTime,
         changeVolume,
-        stopPlayback
+        stopPlayback,
+        initWaveSurfer,
+        wavesurferRef
       }}
     >
       {children}
