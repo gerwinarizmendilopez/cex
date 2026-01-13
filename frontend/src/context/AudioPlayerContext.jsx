@@ -16,17 +16,19 @@ export const AudioPlayerProvider = ({ children }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [isSeeking, setIsSeeking] = useState(false);
   const audioRef = useRef(null);
 
-  // Crear elemento de audio una vez
   useEffect(() => {
-    audioRef.current = new Audio();
-    audioRef.current.volume = volume;
-    
-    const audio = audioRef.current;
+    const audio = new Audio();
+    audioRef.current = audio;
+    audio.volume = volume;
     
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
+      // NO actualizar si el usuario está arrastrando el slider
+      if (!isSeeking) {
+        setCurrentTime(audio.currentTime);
+      }
     };
     
     const handleLoadedMetadata = () => {
@@ -38,9 +40,9 @@ export const AudioPlayerProvider = ({ children }) => {
       setCurrentTime(0);
     };
     
-    const handleError = () => {
+    const handleError = (e) => {
+      console.error('Audio error:', e);
       setIsPlaying(false);
-      console.error('Error loading audio');
     };
     
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -55,12 +57,11 @@ export const AudioPlayerProvider = ({ children }) => {
       audio.removeEventListener('error', handleError);
       audio.pause();
     };
-  }, []);
+  }, [isSeeking]);
 
   const playBeat = useCallback(async (beat, audioUrl) => {
     const audio = audioRef.current;
     
-    // Si es el mismo beat, toggle play/pause
     if (currentBeat?.beat_id === beat.beat_id) {
       if (isPlaying) {
         audio.pause();
@@ -72,7 +73,6 @@ export const AudioPlayerProvider = ({ children }) => {
       return;
     }
     
-    // Nuevo beat
     setCurrentBeat(beat);
     audio.src = audioUrl;
     setCurrentTime(0);
@@ -100,22 +100,26 @@ export const AudioPlayerProvider = ({ children }) => {
     }
   }, [currentBeat, isPlaying]);
 
-  const seek = useCallback((time) => {
-    const audio = audioRef.current;
-    if (audio && !isNaN(time) && time >= 0) {
-      try {
-        audio.currentTime = Math.min(time, audio.duration || Infinity);
-        setCurrentTime(audio.currentTime);
-      } catch (e) {
-        console.error('Error seeking:', e);
-      }
-    }
+  // Iniciar seeking - pausar actualizaciones de tiempo
+  const startSeeking = useCallback(() => {
+    setIsSeeking(true);
   }, []);
 
-  const seekPercentage = useCallback((percentage) => {
-    const newTime = (percentage / 100) * duration;
-    seek(newTime);
-  }, [duration, seek]);
+  // Hacer seek real al audio
+  const seek = useCallback((time) => {
+    const audio = audioRef.current;
+    if (audio && !isNaN(time)) {
+      const clampedTime = Math.max(0, Math.min(time, audio.duration || 0));
+      audio.currentTime = clampedTime;
+      setCurrentTime(clampedTime);
+    }
+    setIsSeeking(false);
+  }, []);
+
+  // Actualizar tiempo visual mientras se arrastra (sin afectar el audio)
+  const updateSeekTime = useCallback((time) => {
+    setCurrentTime(time);
+  }, []);
 
   const changeVolume = useCallback((newVolume) => {
     const audio = audioRef.current;
@@ -144,10 +148,12 @@ export const AudioPlayerProvider = ({ children }) => {
         currentTime,
         duration,
         volume,
+        isSeeking,
         playBeat,
         togglePlayPause,
+        startSeeking,
         seek,
-        seekPercentage,
+        updateSeekTime,
         changeVolume,
         stopPlayback
       }}
