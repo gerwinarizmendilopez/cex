@@ -220,7 +220,7 @@ async def send_purchase_confirmation_email(
                 
                 <h1>¡Compra Exitosa!</h1>
                 
-                <p>Gracias por tu compra en V CLUB.</p>
+                <p>Gracias por tu compra en HØME.</p>
                 
                 <div class="order-details">
                     <h3 style="color: #dc2626; margin-top: 0;">Detalles de tu orden:</h3>
