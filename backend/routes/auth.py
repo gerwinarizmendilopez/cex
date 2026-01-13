@@ -61,11 +61,12 @@ async def get_user_by_email(email: str) -> Optional[UserInDB]:
             email=ADMIN_EMAIL,
             hashed_password=ADMIN_PASSWORD_HASH,
             is_admin=True,
-            is_verified=True
+            is_verified=True,
+            auth_provider="email"
         )
     
-    # Buscar en la base de datos
-    user = await db.users.find_one({"email": email})
+    # Buscar en la base de datos (excluir _id)
+    user = await db.users.find_one({"email": email}, {"_id": 0})
     if user:
         return UserInDB(**user)
     return None
