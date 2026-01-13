@@ -40,42 +40,51 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden hero-with-bg">
-        <div className="absolute inset-0 hero-bg-image"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black pointer-events-none" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center px-4 py-2 bg-red-600/10 border border-red-600/20 rounded-full mb-6">
-              <Zap className="w-4 h-4 text-red-500 mr-2" />
-              <span className="text-sm text-red-400 font-medium">100+ Beats Profesionales</span>
-            </div>
+      {/* Hero Section - EDM Ghost Style */}
+      <section className="relative min-h-screen flex items-center justify-start px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background Image - B&W Beatmaker */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=1920&q=80')`,
+            filter: 'grayscale(100%) brightness(0.3)'
+          }}
+        />
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
+        
+        <div className="max-w-7xl mx-auto relative z-10 w-full">
+          <div className="max-w-2xl">
+            {/* Subtitle */}
+            <p className="text-gray-400 text-lg md:text-xl mb-4 font-light tracking-wide">
+              Vive la experiencia de ser uno de los grandes de la industria
+            </p>
             
-            <h1 className="md:text-7xl !font-bold !text-5xl mb-6">
-              
-              
-              
-              <span className="text-red-600"></span>
+            {/* Main Title */}
+            <h1 
+              className="text-6xl md:text-7xl lg:text-8xl font-black text-white leading-none tracking-tight mb-12"
+              style={{ fontFamily: "'Arial Black', 'Helvetica Bold', sans-serif" }}
+            >
+              HØME.
             </h1>
             
-            <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-              Descarga beats listos para lanzar, monetizar y llevar tu carrera al siguiente nivel. Calidad de estudio, licencias claras, descarga inmediata.
-            </p>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mt-16 max-w-2xl mx-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-500">100+</div>
-                <div className="text-sm text-gray-400 mt-1">Beats Disponibles</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-500">500+</div>
-                <div className="text-sm text-gray-400 mt-1">Artistas Confían</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-500">24h</div>
-                <div className="text-sm text-gray-400 mt-1">Descarga Inmediata</div>
-              </div>
+            {/* Buttons */}
+            <div className="flex flex-wrap items-center gap-8">
+              <Link 
+                to="/catalogo"
+                className="group relative text-white text-sm font-medium tracking-widest uppercase"
+              >
+                <span className="relative z-10">CONÓCENOS</span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-red-500 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              
+              <Link 
+                to="/contacto"
+                className="group relative text-white text-sm font-medium tracking-widest uppercase border border-white/30 px-6 py-3 rounded-sm hover:bg-white hover:text-black transition-all duration-300"
+              >
+                <span>QUIERO UN BEAT PERSONALIZADO</span>
+              </Link>
             </div>
           </div>
         </div>
