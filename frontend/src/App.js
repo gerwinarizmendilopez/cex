@@ -38,6 +38,7 @@ function AppRouter() {
         <Route path="/beat/:id" element={<BeatDetail />} />
         <Route path="/licencias" element={<Licencias />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/purchase-success" element={<PurchaseSuccess />} />
         <Route path="/login" element={<Login />} />
         <Route 
           path="/admin" 
