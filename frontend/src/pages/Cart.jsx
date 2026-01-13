@@ -13,7 +13,6 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Inicializar Stripe
 let stripePromise = null;
 
 const getStripeConfig = async () => {
@@ -32,12 +31,11 @@ const licenseNames = {
   exclusiva: 'Exclusiva'
 };
 
-const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
+const CheckoutForm = ({ cartItems, cartTotal, onSuccess, user }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
-  const [buyerEmail, setBuyerEmail] = useState('');
-  const [buyerName, setBuyerName] = useState('');
+  const [buyerName, setBuyerName] = useState(user?.name || '');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,33 +44,30 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
       return;
     }
 
-    if (!buyerEmail || !buyerName) {
-      toast.error('Por favor completa todos los campos');
+    if (!buyerName) {
+      toast.error('Por favor ingresa tu nombre completo');
       return;
     }
 
     setProcessing(true);
 
     try {
-      // Procesar cada item del carrito
       for (const item of cartItems) {
-        // Crear Payment Intent
         const { data: paymentIntent } = await axios.post(`${API}/payment/create-payment-intent`, {
           beat_id: item.beat_id,
           beat_name: item.beat_name,
           license_type: item.license_type,
           amount: item.price,
-          buyer_email: buyerEmail,
+          buyer_email: user.email,
           buyer_name: buyerName
         });
 
-        // Confirmar el pago con Stripe
         const result = await stripe.confirmCardPayment(paymentIntent.client_secret, {
           payment_method: {
             card: elements.getElement(CardElement),
             billing_details: {
               name: buyerName,
-              email: buyerEmail,
+              email: user.email,
             },
           },
         });
@@ -81,16 +76,22 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
           throw new Error(result.error.message);
         }
 
-        // Confirmar en el backend
-        await axios.post(`${API}/payment/confirm-payment`, {
+        const confirmResponse = await axios.post(`${API}/payment/confirm-payment`, {
           payment_intent_id: result.paymentIntent.id,
           beat_id: item.beat_id,
           license_type: item.license_type,
-          buyer_email: buyerEmail
+          buyer_email: user.email,
+          buyer_name: buyerName
         });
+
+        if (confirmResponse.data.exclusive) {
+          toast.success('¡Licencia Exclusiva Adquirida!', {
+            description: 'El beat ha sido retirado del catálogo. Recibirás los archivos por email.'
+          });
+        }
       }
 
-      toast.success('¡Pago procesado exitosamente!', {
+      toast.success('¡Compra exitosa!', {
         description: 'Recibirás tus beats por email en breve'
       });
       
@@ -109,28 +110,27 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-white mb-2">
-          Nombre Completo
+          Email
+        </label>
+        <input
+          type="email"
+          value={user?.email || ''}
+          disabled
+          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-gray-400 cursor-not-allowed"
+        />
+        <p className="text-xs text-gray-500 mt-1">Email de tu cuenta</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-white mb-2">
+          Nombre Completo *
         </label>
         <input
           type="text"
           value={buyerName}
           onChange={(e) => setBuyerName(e.target.value)}
           className="w-full px-4 py-3 bg-zinc-900 border border-red-900/20 rounded-lg text-white focus:outline-none focus:border-red-600"
-          placeholder="Tu nombre"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-white mb-2">
-          Email
-        </label>
-        <input
-          type="email"
-          value={buyerEmail}
-          onChange={(e) => setBuyerEmail(e.target.value)}
-          className="w-full px-4 py-3 bg-zinc-900 border border-red-900/20 rounded-lg text-white focus:outline-none focus:border-red-600"
-          placeholder="tu@email.com"
+          placeholder="Tu nombre completo"
           required
         />
       </div>
@@ -178,7 +178,7 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
 
 export const Cart = () => {
   const { cartItems, cartTotal, removeFromCart, clearCart, loading } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
   const [stripeLoaded, setStripeLoaded] = useState(false);
 
@@ -198,15 +198,15 @@ export const Cart = () => {
     setShowCheckout(false);
   };
 
-  // Si no está autenticado, mostrar mensaje
+  // Si no está autenticado, mostrar mensaje para iniciar sesión
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-black text-white pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <ShoppingCart className="w-24 h-24 text-gray-600 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold mb-4">Inicia sesión para ver tu carrito</h2>
-            <p className="text-gray-400 mb-8">Necesitas una cuenta para guardar y gestionar tu carrito</p>
+            <h2 className="text-3xl font-bold mb-4">Inicia sesión para comprar</h2>
+            <p className="text-gray-400 mb-8">Necesitas una cuenta para realizar compras y gestionar tu carrito</p>
             <Link to="/login">
               <Button className="bg-red-600 hover:bg-red-700">
                 <LogIn className="w-4 h-4 mr-2" />
@@ -296,9 +296,15 @@ export const Cart = () => {
                             {item.beat_name}
                           </h3>
                         </Link>
-                        <p className="text-sm text-red-400 mt-2 font-semibold">
+                        <p className={`text-sm mt-2 font-semibold ${item.license_type === 'exclusiva' ? 'text-yellow-500' : 'text-red-400'}`}>
                           Licencia {licenseNames[item.license_type] || item.license_type}
+                          {item.license_type === 'exclusiva' && ' ⭐'}
                         </p>
+                        {item.license_type === 'exclusiva' && (
+                          <p className="text-xs text-yellow-500/70 mt-1">
+                            El beat será retirado del catálogo tras la compra
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-red-500 mb-4">
@@ -359,10 +365,12 @@ export const Cart = () => {
                           cartItems={cartItems}
                           cartTotal={cartTotal}
                           onSuccess={handleCheckoutSuccess}
+                          user={user}
                         />
                       </Elements>
                     ) : (
                       <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto mb-2"></div>
                         <p className="text-gray-400">Cargando formulario de pago...</p>
                       </div>
                     )}
