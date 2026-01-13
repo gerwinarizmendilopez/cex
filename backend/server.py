@@ -76,6 +76,9 @@ app.include_router(api_router)
 # Include payment routes
 app.include_router(payment_router)
 
+# Include auth routes
+app.include_router(auth_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
