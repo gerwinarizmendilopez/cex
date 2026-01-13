@@ -152,15 +152,18 @@ export const Header = () => {
 
                 Licencias
               </Link>
-              <Link
-              to="/admin"
-              className={`text-sm font-medium ${
-              isActive('/admin') ? 'text-red-500' : 'text-gray-300'}`
-              }
-              onClick={() => setMobileMenuOpen(false)}>
+              {/* Admin solo visible para administradores */}
+              {user?.is_admin && (
+                <Link
+                to="/admin"
+                className={`text-sm font-medium ${
+                isActive('/admin') ? 'text-red-500' : 'text-gray-300'}`
+                }
+                onClick={() => setMobileMenuOpen(false)}>
 
-                Admin
-              </Link>
+                  Admin
+                </Link>
+              )}
               <Link to="/cart" onClick={() => setMobileMenuOpen(false)}>
                 <Button
                 variant="outline"
