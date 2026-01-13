@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Play, Pause, Music2, Filter, Search } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -15,8 +16,8 @@ export const Catalogo = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
-  const [playingBeatId, setPlayingBeatId] = useState(null);
-  const audioRef = useRef(null);
+  
+  const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
 
   const genres = ['all', 'Trap', 'Reggaeton', 'R&B', 'Hip Hop', 'Drill', 'Lo-Fi', 'Afrobeat'];
 
@@ -53,55 +54,18 @@ export const Catalogo = () => {
     });
 
   const handlePlayPause = async (beat) => {
-    if (playingBeatId === beat.beat_id) {
-      // Pausar
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setPlayingBeatId(null);
-    } else {
-      // Reproducir nuevo beat
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      
-      const audioUrl = `${API}/beats/audio/${beat.audio_url.split('/').pop()}`;
-      
-      // Crear nuevo elemento de audio
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      
-      audio.onended = () => {
-        setPlayingBeatId(null);
-      };
-      
-      audio.onerror = () => {
-        toast.error('Error al reproducir el audio');
-        setPlayingBeatId(null);
-      };
-      
-      try {
-        await audio.play();
-        setPlayingBeatId(beat.beat_id);
-        
-        // Registrar play en el servidor
-        axios.post(`${API}/beats/${beat.beat_id}/play`).catch(() => {});
-      } catch (error) {
-        console.error('Error reproduciendo:', error);
-        toast.error('Error al reproducir');
-      }
+    const audioUrl = `${API}/beats/audio/${beat.audio_url.split('/').pop()}`;
+    await playBeat(beat, audioUrl);
+    
+    // Registrar play en el servidor (solo si es un nuevo beat)
+    if (currentBeat?.beat_id !== beat.beat_id) {
+      axios.post(`${API}/beats/${beat.beat_id}/play`).catch(() => {});
     }
   };
 
-  // Limpiar audio al desmontar
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
+  const isCurrentBeatPlaying = (beatId) => {
+    return currentBeat?.beat_id === beatId && isPlaying;
+  };
 
   if (loading) {
     return (
@@ -115,7 +79,7 @@ export const Catalogo = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen bg-black text-white pt-24 pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12">
@@ -205,24 +169,18 @@ export const Catalogo = () => {
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Button 
                         size="lg" 
-                        className={`${playingBeatId === beat.beat_id ? 'bg-white text-black hover:bg-gray-200' : 'bg-red-600 hover:bg-red-700'}`}
+                        className={`rounded-full w-14 h-14 ${isCurrentBeatPlaying(beat.beat_id) ? 'bg-white text-black hover:bg-gray-200' : 'bg-red-600 hover:bg-red-700'}`}
                         onClick={() => handlePlayPause(beat)}
                       >
-                        {playingBeatId === beat.beat_id ? (
-                          <>
-                            <Pause className="w-5 h-5 mr-2" />
-                            Pausar
-                          </>
+                        {isCurrentBeatPlaying(beat.beat_id) ? (
+                          <Pause className="w-6 h-6" />
                         ) : (
-                          <>
-                            <Play className="w-5 h-5 mr-2" />
-                            Preview
-                          </>
+                          <Play className="w-6 h-6 ml-1" />
                         )}
                       </Button>
                     </div>
                     {/* Playing Indicator */}
-                    {playingBeatId === beat.beat_id && (
+                    {isCurrentBeatPlaying(beat.beat_id) && (
                       <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 bg-red-600 rounded-full">
                         <div className="flex gap-0.5">
                           <span className="w-1 h-3 bg-white rounded-full animate-pulse"></span>
