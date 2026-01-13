@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -19,48 +19,52 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(() => localStorage.getItem('home_token'));
 
-  useEffect(() => {
-    // Verificar token JWT existente o sesión de Google
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      // Primero intentar verificar token JWT
-      if (token) {
+  const checkAuth = useCallback(async () => {
+    const storedToken = localStorage.getItem('home_token');
+    
+    if (storedToken) {
+      try {
         const response = await axios.get(`${API}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${storedToken}` }
         });
         setUser(response.data);
-        setLoading(false);
-        return;
+        setToken(storedToken);
+      } catch (error) {
+        console.error('Token inválido, limpiando sesión:', error);
+        localStorage.removeItem('home_token');
+        setToken(null);
+        setUser(null);
       }
-
-      // Si no hay token JWT, intentar sesión de Google via cookie
+    } else {
+      // No hay token, intentar sesión de Google via cookie
       try {
         const googleResponse = await axios.get(`${API}/auth/google/me`, {
           withCredentials: true
         });
         setUser(googleResponse.data);
       } catch (googleError) {
-        // No hay sesión activa, usuario no autenticado
+        // No hay sesión activa
         setUser(null);
       }
-    } catch (error) {
-      console.error('Error verificando autenticación:', error);
-      logout();
-    } finally {
-      setLoading(false);
     }
-  };
+    
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password });
     const { access_token, user: userData } = response.data;
     
+    // Guardar token en localStorage PRIMERO
+    localStorage.setItem('home_token', access_token);
+    
+    // Luego actualizar estado
     setToken(access_token);
     setUser(userData);
-    localStorage.setItem('home_token', access_token);
     
     return userData;
   };
@@ -82,7 +86,6 @@ export const AuthProvider = ({ children }) => {
 
   // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
   const loginWithGoogle = () => {
-    // Usar window.location.origin para obtener la URL dinámica
     const redirectUrl = window.location.origin + '/';
     window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
   };
@@ -96,17 +99,21 @@ export const AuthProvider = ({ children }) => {
     
     const { access_token, user: userData } = response.data;
     
-    // Guardar token JWT para mantener compatibilidad
+    // Guardar token en localStorage PRIMERO
+    localStorage.setItem('home_token', access_token);
+    
+    // Luego actualizar estado
     setToken(access_token);
     setUser(userData);
-    localStorage.setItem('home_token', access_token);
     
     return userData;
   };
 
   const logout = async () => {
+    // Limpiar localStorage PRIMERO
+    localStorage.removeItem('home_token');
+    
     try {
-      // Intentar cerrar sesión de Google si existe
       await axios.post(`${API}/auth/google/logout`, {}, { withCredentials: true });
     } catch (error) {
       // Ignorar errores de logout de Google
@@ -114,7 +121,6 @@ export const AuthProvider = ({ children }) => {
     
     setToken(null);
     setUser(null);
-    localStorage.removeItem('home_token');
   };
 
   return (
