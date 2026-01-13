@@ -214,3 +214,20 @@ async def get_sales():
         "sales": sales,
         "total": len(sales)
     }
+
+
+@router.get("/purchase/{sale_id}")
+async def get_purchase(sale_id: str):
+    """
+    Obtener detalles de una compra específica
+    """
+    sale = await db.sales.find_one({"sale_id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        # Intentar buscar por payment_intent_id
+        sale = await db.sales.find_one({"payment_intent_id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        raise HTTPException(status_code=404, detail="Compra no encontrada")
+    
+    return sale
