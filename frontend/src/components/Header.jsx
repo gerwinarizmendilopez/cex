@@ -55,14 +55,17 @@ export const Header = () => {
 
               Licencias
             </Link>
-            <Link
-              to="/admin"
-              className={`text-sm font-medium transition-colors ${
-              isActive('/admin') ? 'text-red-500' : 'text-gray-300 hover:text-white'}`
-              }>
+            {/* Admin solo visible para administradores */}
+            {user?.is_admin && (
+              <Link
+                to="/admin"
+                className={`text-sm font-medium transition-colors ${
+                isActive('/admin') ? 'text-red-500' : 'text-gray-300 hover:text-white'}`
+                }>
 
-              Admin
-            </Link>
+                Admin
+              </Link>
+            )}
           </nav>
 
           {/* User Actions */}
