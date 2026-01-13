@@ -96,7 +96,7 @@ export const Footer = () => {
 
         <div className="border-t border-red-900/20 mt-8 pt-8">
           <p className="text-center text-gray-400 text-sm">
-            © 2025 V CLUB. Todos los derechos reservados. Hecho para artistas que quieren ganar.
+            © 2025 HØME. Todos los derechos reservados. Hecho para artistas que quieren ganar.
           </p>
         </div>
       </div>
