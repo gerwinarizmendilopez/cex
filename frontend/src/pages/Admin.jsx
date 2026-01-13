@@ -328,9 +328,10 @@ export const Admin = () => {
                   </div>
                 </div>
 
-                {/* Audio Upload */}
+                {/* Audio Upload - MP3 */}
                 <div>
-                  <Label>Archivo de Audio (MP3/WAV) *</Label>
+                  <Label>Archivo MP3 (Exhibición y Licencia Básica) *</Label>
+                  <p className="text-xs text-gray-500 mb-2">Este archivo será usado para preview y descargas de licencia básica</p>
                   <div 
                     className={`mt-2 flex justify-center px-6 py-8 border-2 border-dashed rounded-lg cursor-pointer ${
                       audioFile ? 'border-green-600/50 bg-green-950/10' : 'border-red-900/20 hover:border-red-600/50'
@@ -345,11 +346,61 @@ export const Admin = () => {
                     ) : (
                       <div className="text-center">
                         <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                        <p className="text-sm text-gray-400 mt-2">Click para seleccionar</p>
+                        <p className="text-sm text-gray-400 mt-2">Click para seleccionar MP3</p>
                       </div>
                     )}
                   </div>
-                  <input ref={audioInputRef} type="file" className="hidden" accept=".mp3,.wav" onChange={handleAudioChange} />
+                  <input ref={audioInputRef} type="file" className="hidden" accept=".mp3" onChange={handleAudioChange} />
+                </div>
+
+                {/* WAV Upload */}
+                <div>
+                  <Label>Archivo WAV (Premium y Exclusiva)</Label>
+                  <p className="text-xs text-gray-500 mb-2">Disponible para licencias Premium y Exclusiva</p>
+                  <div 
+                    className={`mt-2 flex justify-center px-6 py-8 border-2 border-dashed rounded-lg cursor-pointer ${
+                      wavFile ? 'border-blue-600/50 bg-blue-950/10' : 'border-red-900/20 hover:border-red-600/50'
+                    }`}
+                    onClick={() => wavInputRef.current?.click()}
+                  >
+                    {wavFile ? (
+                      <div className="text-center">
+                        <Check className="mx-auto h-8 w-8 text-blue-500" />
+                        <p className="text-sm text-blue-400 mt-2">{wavPreview}</p>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                        <p className="text-sm text-gray-400 mt-2">Click para seleccionar WAV (opcional)</p>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={wavInputRef} type="file" className="hidden" accept=".wav" onChange={handleWavChange} />
+                </div>
+
+                {/* Stems Upload */}
+                <div>
+                  <Label>Stems RAR/ZIP (Solo Exclusiva)</Label>
+                  <p className="text-xs text-gray-500 mb-2">Disponible únicamente para licencia Exclusiva</p>
+                  <div 
+                    className={`mt-2 flex justify-center px-6 py-8 border-2 border-dashed rounded-lg cursor-pointer ${
+                      stemsFile ? 'border-yellow-600/50 bg-yellow-950/10' : 'border-red-900/20 hover:border-red-600/50'
+                    }`}
+                    onClick={() => stemsInputRef.current?.click()}
+                  >
+                    {stemsFile ? (
+                      <div className="text-center">
+                        <Check className="mx-auto h-8 w-8 text-yellow-500" />
+                        <p className="text-sm text-yellow-400 mt-2">{stemsPreview}</p>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                        <p className="text-sm text-gray-400 mt-2">Click para seleccionar RAR/ZIP (opcional)</p>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={stemsInputRef} type="file" className="hidden" accept=".rar,.zip" onChange={handleStemsChange} />
                 </div>
 
                 {/* Cover Upload */}
