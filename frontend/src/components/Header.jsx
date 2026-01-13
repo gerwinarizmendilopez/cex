@@ -7,6 +7,8 @@ import { useCart } from '../context/CartContext';
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount();
 
   const isActive = (path) => location.pathname === path;
 
