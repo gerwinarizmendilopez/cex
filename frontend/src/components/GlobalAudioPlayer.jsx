@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Play, Pause, X, Volume2, VolumeX } from 'lucide-react';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { Button } from './ui/button';
@@ -20,95 +20,76 @@ export const GlobalAudioPlayer = () => {
     duration,
     volume,
     togglePlayPause,
+    startSeeking,
     seek,
+    updateSeekTime,
     changeVolume,
     stopPlayback
   } = useAudioPlayer();
 
-  // Estado para saber si estamos arrastrando
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragValue, setDragValue] = useState(0);
-
   if (!currentBeat) return null;
 
-  // Usar dragValue mientras arrastramos, currentTime cuando no
-  const displayTime = isDragging ? dragValue : currentTime;
-  const progress = duration ? (displayTime / duration) * 100 : 0;
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
   
   const coverUrl = currentBeat.cover_url 
     ? `${API}/beats/cover/${currentBeat.cover_url.split('/').pop()}`
     : 'https://via.placeholder.com/60?text=🎵';
 
-  // Al empezar a arrastrar
-  const handleMouseDown = () => {
-    setIsDragging(true);
-    setDragValue(currentTime);
-  };
-
-  // Mientras arrastramos (actualiza visualmente)
-  const handleInput = (e) => {
-    const newTime = parseFloat(e.target.value);
-    setDragValue(newTime);
-  };
-
-  // Al soltar (hace el seek real)
-  const handleChange = (e) => {
-    if (!isDragging) return;
-    const newTime = parseFloat(e.target.value);
-    seek(newTime);
-    setIsDragging(false);
-  };
-
-  // Por si suelta fuera del slider
-  const handleMouseUp = () => {
-    if (isDragging) {
-      seek(dragValue);
-      setIsDragging(false);
-    }
-  };
-
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 border-t border-red-900/30">
       {/* Progress Bar */}
-      <div className="w-full h-8 relative flex items-center px-3 bg-zinc-800">
-        <span className="text-xs text-gray-400 w-10 text-right mr-3 font-mono">{formatTime(displayTime)}</span>
+      <div className="w-full h-8 flex items-center px-3 bg-zinc-800">
+        <span className="text-xs text-gray-400 w-10 text-right mr-3 font-mono">
+          {formatTime(currentTime)}
+        </span>
         
         <div className="flex-1 relative h-full flex items-center">
           {/* Track background */}
-          <div className="absolute inset-x-0 h-1.5 bg-zinc-700 rounded-full" />
+          <div className="absolute inset-x-0 h-2 bg-zinc-700 rounded-full" />
           
           {/* Progress fill */}
           <div 
-            className="absolute left-0 h-1.5 bg-red-600 rounded-full pointer-events-none"
+            className="absolute left-0 h-2 bg-red-600 rounded-full pointer-events-none"
             style={{ width: `${progress}%` }}
           />
           
-          {/* Range input - invisible but functional */}
+          {/* Native range input */}
           <input
             type="range"
             min={0}
             max={duration || 100}
             step={0.1}
-            value={displayTime}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleMouseDown}
-            onInput={handleInput}
-            onChange={handleChange}
-            onMouseUp={handleMouseUp}
-            onTouchEnd={handleMouseUp}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            value={currentTime}
+            onMouseDown={startSeeking}
+            onTouchStart={startSeeking}
+            onInput={(e) => updateSeekTime(parseFloat(e.target.value))}
+            onMouseUp={(e) => seek(parseFloat(e.target.value))}
+            onTouchEnd={(e) => seek(parseFloat(e.target.value))}
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              opacity: 0,
+              cursor: 'pointer',
+              zIndex: 10,
+              margin: 0,
+              padding: 0
+            }}
           />
           
-          {/* Visible thumb */}
+          {/* Thumb */}
           <div 
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg pointer-events-none transition-transform hover:scale-110"
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg pointer-events-none"
             style={{ left: `calc(${progress}% - 8px)` }}
           />
         </div>
         
-        <span className="text-xs text-gray-400 w-10 ml-3 font-mono">{formatTime(duration)}</span>
+        <span className="text-xs text-gray-400 w-10 ml-3 font-mono">
+          {formatTime(duration)}
+        </span>
       </div>
 
+      {/* Controls */}
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between gap-4">
           {/* Beat Info */}
@@ -125,7 +106,7 @@ export const GlobalAudioPlayer = () => {
             </div>
           </div>
 
-          {/* Controls */}
+          {/* Play/Pause & Volume */}
           <div className="flex items-center gap-3">
             <Button
               size="lg"
@@ -135,9 +116,11 @@ export const GlobalAudioPlayer = () => {
               {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
             </Button>
 
-            {/* Volume */}
             <div className="hidden md:flex items-center gap-2">
-              <button onClick={() => changeVolume(volume > 0 ? 0 : 1)} className="text-gray-400 hover:text-white p-1">
+              <button 
+                onClick={() => changeVolume(volume > 0 ? 0 : 1)} 
+                className="text-gray-400 hover:text-white p-1"
+              >
                 {volume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </button>
               <input
@@ -147,16 +130,17 @@ export const GlobalAudioPlayer = () => {
                 step={0.01}
                 value={volume}
                 onChange={(e) => changeVolume(parseFloat(e.target.value))}
-                className="w-16 h-1 appearance-none bg-zinc-700 rounded-full cursor-pointer
-                  [&::-webkit-slider-thumb]:appearance-none
-                  [&::-webkit-slider-thumb]:w-3
-                  [&::-webkit-slider-thumb]:h-3
-                  [&::-webkit-slider-thumb]:bg-white
-                  [&::-webkit-slider-thumb]:rounded-full"
+                className="w-16 h-1 cursor-pointer"
+                style={{ accentColor: '#fff' }}
               />
             </div>
 
-            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={stopPlayback}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-400 hover:text-white" 
+              onClick={stopPlayback}
+            >
               <X className="w-5 h-5" />
             </Button>
           </div>
