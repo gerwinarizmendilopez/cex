@@ -306,6 +306,40 @@ async def get_cover(filename: str):
     )
 
 
+@router.get("/wav/{filename}")
+async def get_wav(filename: str):
+    """Servir archivo WAV (para premium y exclusiva)"""
+    file_path = WAV_DIR / filename
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo WAV no encontrado")
+    
+    return FileResponse(
+        path=file_path,
+        media_type="audio/wav",
+        filename=filename
+    )
+
+
+@router.get("/stems/{filename}")
+async def get_stems(filename: str):
+    """Servir archivo de stems (para exclusiva)"""
+    file_path = STEMS_DIR / filename
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo de stems no encontrado")
+    
+    # Determinar tipo de contenido
+    ext = Path(filename).suffix.lower()
+    content_type = "application/x-rar-compressed" if ext == ".rar" else "application/zip"
+    
+    return FileResponse(
+        path=file_path,
+        media_type=content_type,
+        filename=filename
+    )
+
+
 @router.post("/{beat_id}/play")
 async def increment_plays(beat_id: str):
     """Incrementar contador de reproducciones"""
