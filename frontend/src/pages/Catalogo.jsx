@@ -192,7 +192,7 @@ export const Catalogo = () => {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="text-lg font-bold mb-2 truncate">{beat.name}</h3>
+                    <h3 className="text-lg font-bold mb-2 truncate text-white">{beat.name}</h3>
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
                       <Music2 className="w-3 h-3" />
                       <span>{beat.bpm} BPM</span>
