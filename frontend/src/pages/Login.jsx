@@ -88,8 +88,8 @@ export const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    // TODO: Implementar Emergent Google Auth
-    toast.info('Próximamente: Login con Google');
+    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    loginWithGoogle();
   };
 
   if (showVerification) {
