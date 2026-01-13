@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { Play, Pause, X, Volume2, VolumeX } from 'lucide-react';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
 import { Button } from './ui/button';
@@ -28,22 +28,62 @@ export const GlobalAudioPlayer = () => {
 
   const progressBarRef = useRef(null);
   const volumeBarRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragTime, setDragTime] = useState(0);
 
-  // Manejar click/drag en la barra de progreso
-  const handleProgressClick = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!progressBarRef.current || !duration) return;
+  // Calcular tiempo basado en posición del mouse
+  const calculateTimeFromEvent = useCallback((e) => {
+    if (!progressBarRef.current || !duration) return 0;
     
     const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const percentage = clickX / rect.width;
-    const newTime = percentage * duration;
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, x / rect.width));
+    return percentage * duration;
+  }, [duration]);
+
+  // Manejar inicio del drag
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    if (!duration) return;
     
-    console.log(`Seeking to ${newTime.toFixed(1)}s (${(percentage * 100).toFixed(1)}%)`);
-    seek(Math.max(0, Math.min(newTime, duration)));
-  }, [duration, seek]);
+    setIsDragging(true);
+    const newTime = calculateTimeFromEvent(e);
+    setDragTime(newTime);
+  }, [duration, calculateTimeFromEvent]);
+
+  // Manejar movimiento durante el drag
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e) => {
+      e.preventDefault();
+      const newTime = calculateTimeFromEvent(e);
+      setDragTime(newTime);
+    };
+
+    const handleMouseUp = (e) => {
+      e.preventDefault();
+      const finalTime = calculateTimeFromEvent(e);
+      seek(finalTime);
+      setIsDragging(false);
+    };
+
+    // Añadir listeners al document para capturar eventos fuera del elemento
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, calculateTimeFromEvent, seek]);
+
+  // Click simple (sin drag)
+  const handleClick = useCallback((e) => {
+    if (isDragging) return;
+    const newTime = calculateTimeFromEvent(e);
+    seek(newTime);
+  }, [isDragging, calculateTimeFromEvent, seek]);
 
   // Manejar click en la barra de volumen
   const handleVolumeClick = useCallback((e) => {
@@ -51,55 +91,52 @@ export const GlobalAudioPlayer = () => {
     
     const rect = volumeBarRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const percentage = clickX / rect.width;
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
     
-    changeVolume(Math.max(0, Math.min(1, percentage)));
+    changeVolume(percentage);
   }, [changeVolume]);
 
   // No mostrar si no hay beat
   if (!currentBeat) return null;
 
-  const progress = duration ? (currentTime / duration) * 100 : 0;
+  // Usar dragTime si estamos arrastrando, sino currentTime
+  const displayTime = isDragging ? dragTime : currentTime;
+  const progress = duration ? (displayTime / duration) * 100 : 0;
+  
   const coverUrl = currentBeat.cover_url 
     ? `${API}/beats/cover/${currentBeat.cover_url.split('/').pop()}`
     : 'https://via.placeholder.com/60?text=🎵';
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-zinc-900 to-zinc-900/95 border-t border-red-900/30 shadow-2xl">
-      {/* Progress Bar - Full width, clickable */}
+      {/* Progress Bar Container */}
       <div 
         ref={progressBarRef}
-        className="w-full h-3 bg-zinc-700 cursor-pointer group relative"
-        onClick={handleProgressClick}
-        onMouseDown={(e) => {
-          handleProgressClick(e);
-          
-          const handleMouseMove = (moveEvent) => {
-            if (progressBarRef.current && duration) {
-              const rect = progressBarRef.current.getBoundingClientRect();
-              const clickX = Math.max(0, Math.min(moveEvent.clientX - rect.left, rect.width));
-              const percentage = clickX / rect.width;
-              const newTime = percentage * duration;
-              seek(Math.max(0, Math.min(newTime, duration)));
-            }
-          };
-          
-          const handleMouseUp = () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-          };
-          
-          document.addEventListener('mousemove', handleMouseMove);
-          document.addEventListener('mouseup', handleMouseUp);
-        }}
+        className="w-full h-4 bg-zinc-800 cursor-pointer relative group"
+        onMouseDown={handleMouseDown}
+        onClick={handleClick}
+        style={{ touchAction: 'none' }}
       >
+        {/* Background track */}
+        <div className="absolute inset-0 bg-zinc-700" />
+        
+        {/* Progress fill */}
         <div 
-          className="h-full bg-red-600 relative transition-none"
+          className="absolute top-0 left-0 h-full bg-red-600 pointer-events-none"
           style={{ width: `${progress}%` }}
-        >
-          {/* Thumb/Handle - Always visible */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg transform translate-x-1/2 hover:scale-125 transition-transform" />
-        </div>
+        />
+        
+        {/* Thumb/Handle */}
+        <div 
+          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg pointer-events-none transition-transform"
+          style={{ 
+            left: `${progress}%`,
+            transform: `translateX(-50%) translateY(-50%) scale(${isDragging ? 1.3 : 1})`,
+          }}
+        />
+        
+        {/* Hover effect line */}
+        <div className="absolute inset-0 bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-3">
@@ -128,7 +165,7 @@ export const GlobalAudioPlayer = () => {
 
           {/* Time Display */}
           <div className="hidden sm:flex items-center gap-2 text-sm text-gray-400 font-mono">
-            <span className="w-12 text-right">{formatTime(currentTime)}</span>
+            <span className="w-12 text-right">{formatTime(displayTime)}</span>
             <span>/</span>
             <span className="w-12">{formatTime(duration)}</span>
           </div>
@@ -154,15 +191,17 @@ export const GlobalAudioPlayer = () => {
               </button>
               <div 
                 ref={volumeBarRef}
-                className="w-20 h-1.5 bg-zinc-700 rounded-full cursor-pointer group"
+                className="w-20 h-2 bg-zinc-700 rounded-full cursor-pointer relative group"
                 onClick={handleVolumeClick}
               >
                 <div 
-                  className="h-full bg-white rounded-full relative"
+                  className="h-full bg-white rounded-full"
                   style={{ width: `${volume * 100}%` }}
-                >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-1/2" />
-                </div>
+                />
+                <div 
+                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ left: `${volume * 100}%`, transform: 'translateX(-50%) translateY(-50%)' }}
+                />
               </div>
             </div>
 
