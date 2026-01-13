@@ -18,6 +18,9 @@ import { Admin } from "./pages/Admin";
 import { Cart } from "./pages/Cart";
 import { Login } from "./pages/Login";
 import { PurchaseSuccess } from "./pages/PurchaseSuccess";
+import { TerminosCondiciones } from "./pages/TerminosCondiciones";
+import { PoliticaPrivacidad } from "./pages/PoliticaPrivacidad";
+import { PoliticaReembolso } from "./pages/PoliticaReembolso";
 
 // Componente que detecta session_id en el hash de la URL
 // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
