@@ -66,7 +66,7 @@ export const Header = () => {
             </Link>
           </nav>
 
-          {/* Cart Button */}
+          {/* User Actions */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/cart">
               <Button
@@ -83,6 +83,31 @@ export const Header = () => {
                 )}
               </Button>
             </Link>
+
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-400">{user.email}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="border-red-900/20 text-gray-400 hover:bg-red-600 hover:text-white">
+
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white">
+
+                  <User className="w-4 h-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
