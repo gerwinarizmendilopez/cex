@@ -14,6 +14,7 @@ from auth.security import (
     User,
     UserInDB
 )
+from services.email_service import send_verification_email
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 security = HTTPBearer()
