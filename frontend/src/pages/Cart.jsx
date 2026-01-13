@@ -514,6 +514,7 @@ export const Cart = () => {
                           cartItems={cartItems}
                           cartTotal={cartTotal}
                           onSuccess={handleCheckoutSuccess}
+                          navigate={navigate}
                         />
                       </Elements>
                     ) : (
