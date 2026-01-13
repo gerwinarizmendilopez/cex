@@ -143,7 +143,7 @@ async def send_purchase_confirmation_email(
         
         from_email = Email(FROM_EMAIL)
         to_email = To(to_email)
-        subject = f"Tu compra: {beat_name} - V CLUB"
+        subject = f"Tu compra: {beat_name} - HØME"
         
         license_names = {
             'basica': 'Básica',
