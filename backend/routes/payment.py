@@ -130,6 +130,7 @@ async def confirm_payment(request: ConfirmPaymentRequest):
                 "beat_name": beat.get("name"),
                 "license_type": request.license_type,
                 "buyer_email": request.buyer_email,
+                "buyer_name": request.buyer_name,
                 "amount": payment_intent.amount / 100,
                 "currency": "usd",
                 "created_at": datetime.now(timezone.utc).isoformat()
