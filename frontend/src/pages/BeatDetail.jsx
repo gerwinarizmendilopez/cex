@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Check, Download, Shield, Music2, Clock, Gauge, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, Download, Shield, Music2, Clock, Gauge, Sparkles, ShoppingCart } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { mockBeats, licenseTypes } from '../mock';
 import { toast } from 'sonner';
+import { useCart } from '../context/CartContext';
 
 export const BeatDetail = () => {
   const { id } = useParams();
