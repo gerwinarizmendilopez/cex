@@ -75,16 +75,36 @@ export const GlobalAudioPlayer = () => {
       {/* Progress Bar - Full width, clickable */}
       <div 
         ref={progressBarRef}
-        className="w-full h-2 bg-zinc-700 cursor-pointer group"
+        className="w-full h-3 bg-zinc-700 cursor-pointer group relative"
         onClick={handleProgressClick}
-        onMouseMove={handleProgressDrag}
+        onMouseDown={(e) => {
+          handleProgressClick(e);
+          
+          const handleMouseMove = (moveEvent) => {
+            if (progressBarRef.current && duration) {
+              const rect = progressBarRef.current.getBoundingClientRect();
+              const clickX = Math.max(0, Math.min(moveEvent.clientX - rect.left, rect.width));
+              const percentage = clickX / rect.width;
+              const newTime = percentage * duration;
+              seek(Math.max(0, Math.min(newTime, duration)));
+            }
+          };
+          
+          const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+          
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
       >
         <div 
-          className="h-full bg-red-600 relative transition-all duration-100"
+          className="h-full bg-red-600 relative transition-none"
           style={{ width: `${progress}%` }}
         >
-          {/* Thumb/Handle */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-1/2" />
+          {/* Thumb/Handle - Always visible */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg transform translate-x-1/2 hover:scale-125 transition-transform" />
         </div>
       </div>
 
