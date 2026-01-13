@@ -374,6 +374,18 @@ async def delete_beat(beat_id: str):
     if cover_path.exists():
         cover_path.unlink()
     
+    # Eliminar WAV si existe
+    if beat.get("wav_filename"):
+        wav_path = WAV_DIR / beat["wav_filename"]
+        if wav_path.exists():
+            wav_path.unlink()
+    
+    # Eliminar stems si existe
+    if beat.get("stems_filename"):
+        stems_path = STEMS_DIR / beat["stems_filename"]
+        if stems_path.exists():
+            stems_path.unlink()
+    
     # Eliminar de la base de datos
     await db.beats.delete_one({"beat_id": beat_id})
     
