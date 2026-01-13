@@ -4,8 +4,10 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { AudioPlayerProvider } from "./context/AudioPlayerContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthCallback } from "./components/AuthCallback";
+import { GlobalAudioPlayer } from "./components/GlobalAudioPlayer";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { Home } from "./pages/Home";
@@ -46,6 +48,7 @@ function AppRouter() {
         />
       </Routes>
       <Footer />
+      <GlobalAudioPlayer />
     </>
   );
 }
@@ -56,8 +59,10 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
-            <AppRouter />
-            <Toaster />
+            <AudioPlayerProvider>
+              <AppRouter />
+              <Toaster />
+            </AudioPlayerProvider>
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
