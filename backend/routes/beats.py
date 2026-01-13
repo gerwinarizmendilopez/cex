@@ -20,10 +20,14 @@ db = client[os.environ['DB_NAME']]
 UPLOAD_DIR = Path("/app/uploads")
 AUDIO_DIR = UPLOAD_DIR / "audio"
 COVERS_DIR = UPLOAD_DIR / "covers"
+WAV_DIR = UPLOAD_DIR / "wav"
+STEMS_DIR = UPLOAD_DIR / "stems"
 
 # Crear directorios si no existen
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 COVERS_DIR.mkdir(parents=True, exist_ok=True)
+WAV_DIR.mkdir(parents=True, exist_ok=True)
+STEMS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class BeatResponse(BaseModel):
