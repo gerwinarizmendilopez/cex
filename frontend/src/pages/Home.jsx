@@ -1,12 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, TrendingUp, Download, Shield, Zap, Crown, ArrowRight } from 'lucide-react';
+import { TrendingUp, Download, Shield, Zap, Crown, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
-import { mockBeats } from '../mock';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 export const Home = () => {
-  const featuredBeats = mockBeats.slice(0, 3);
+  const [beats, setBeats] = useState([]);
+
+  useEffect(() => {
+    const fetchBeats = async () => {
+      try {
+        const response = await axios.get(`${API}/beats`);
+        setBeats(response.data.beats || []);
+      } catch (error) {
+        console.error('Error loading beats:', error);
+      }
+    };
+    fetchBeats();
+  }, []);
+
+  // Get cover images for the gallery
+  const getGalleryImages = () => {
+    if (beats.length === 0) {
+      // Fallback placeholder images
+      return Array(9).fill('https://via.placeholder.com/300x300?text=🎵');
+    }
+    // Repeat beats to fill 9 slots if needed
+    const images = [];
+    for (let i = 0; i < 9; i++) {
+      const beat = beats[i % beats.length];
+      images.push(`${API}/beats/cover/${beat.cover_url.split('/').pop()}`);
+    }
+    return images;
+  };
+
+  const galleryImages = getGalleryImages();
 
   return (
     <div className="min-h-screen bg-black text-white">
