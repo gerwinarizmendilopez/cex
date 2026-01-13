@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Trash2, ArrowLeft, CreditCard } from 'lucide-react';
+import { ShoppingCart, Trash2, ArrowLeft, CreditCard, LogIn } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'sonner';
@@ -23,6 +24,12 @@ const getStripeConfig = async () => {
     console.error('Error obteniendo config de Stripe:', error);
     return null;
   }
+};
+
+const licenseNames = {
+  basica: 'Básica',
+  premium: 'Premium',
+  exclusiva: 'Exclusiva'
 };
 
 const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
@@ -51,9 +58,9 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
       for (const item of cartItems) {
         // Crear Payment Intent
         const { data: paymentIntent } = await axios.post(`${API}/payment/create-payment-intent`, {
-          beat_id: item.beat.id,
-          beat_name: item.beat.name,
-          license_type: item.licenseType,
+          beat_id: item.beat_id,
+          beat_name: item.beat_name,
+          license_type: item.license_type,
           amount: item.price,
           buyer_email: buyerEmail,
           buyer_name: buyerName
@@ -77,8 +84,8 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
         // Confirmar en el backend
         await axios.post(`${API}/payment/confirm-payment`, {
           payment_intent_id: result.paymentIntent.id,
-          beat_id: item.beat.id,
-          license_type: item.licenseType,
+          beat_id: item.beat_id,
+          license_type: item.license_type,
           buyer_email: buyerEmail
         });
       }
@@ -170,10 +177,10 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
 };
 
 export const Cart = () => {
-  const { cartItems, removeFromCart, clearCart, getCartTotal } = useCart();
+  const { cartItems, cartTotal, removeFromCart, clearCart, loading } = useCart();
+  const { isAuthenticated } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
   const [stripeLoaded, setStripeLoaded] = useState(false);
-  const cartTotal = getCartTotal();
 
   React.useEffect(() => {
     const loadStripeConfig = async () => {
@@ -190,6 +197,38 @@ export const Cart = () => {
     clearCart();
     setShowCheckout(false);
   };
+
+  // Si no está autenticado, mostrar mensaje
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-20">
+            <ShoppingCart className="w-24 h-24 text-gray-600 mx-auto mb-6" />
+            <h2 className="text-3xl font-bold mb-4">Inicia sesión para ver tu carrito</h2>
+            <p className="text-gray-400 mb-8">Necesitas una cuenta para guardar y gestionar tu carrito</p>
+            <Link to="/login">
+              <Button className="bg-red-600 hover:bg-red-700">
+                <LogIn className="w-4 h-4 mr-2" />
+                Iniciar Sesión
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white pt-24 pb-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Cargando carrito...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -216,7 +255,7 @@ export const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen bg-black text-white pt-24 pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link to="/catalogo" className="inline-flex items-center text-gray-400 hover:text-white mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -239,26 +278,26 @@ export const Cart = () => {
             </div>
 
             <div className="space-y-4">
-              {cartItems.map((item) => (
-                <Card key={item.id} className="bg-zinc-900 border-red-900/20">
+              {cartItems.map((item, index) => (
+                <Card key={`${item.beat_id}-${item.license_type}-${index}`} className="bg-zinc-900 border-red-900/20">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <img
-                        src={item.beat.coverImage}
-                        alt={item.beat.name}
+                        src={item.cover_image}
+                        alt={item.beat_name}
                         className="w-24 h-24 rounded-lg object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/96?text=🎵';
+                        }}
                       />
                       <div className="flex-1">
-                        <Link to={`/beat/${item.beat.id}`}>
+                        <Link to={`/beat/${item.beat_id}`}>
                           <h3 className="text-xl font-bold hover:text-red-500 transition-colors">
-                            {item.beat.name}
+                            {item.beat_name}
                           </h3>
                         </Link>
-                        <p className="text-sm text-gray-400 mt-1">
-                          {item.beat.bpm} BPM • {item.beat.key} • {item.beat.genre}
-                        </p>
                         <p className="text-sm text-red-400 mt-2 font-semibold">
-                          Licencia {item.licenseType.charAt(0).toUpperCase() + item.licenseType.slice(1)}
+                          Licencia {licenseNames[item.license_type] || item.license_type}
                         </p>
                       </div>
                       <div className="text-right">
@@ -269,7 +308,7 @@ export const Cart = () => {
                           variant="outline"
                           size="sm"
                           className="border-red-900/20 text-red-500 hover:bg-red-600 hover:text-white"
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(item.beat_id, item.license_type)}
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
                           Eliminar
@@ -289,9 +328,9 @@ export const Cart = () => {
                 <h2 className="text-2xl font-bold mb-6">Resumen del Pedido</h2>
 
                 <div className="space-y-3 mb-6">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-gray-400">{item.beat.name}</span>
+                  {cartItems.map((item, index) => (
+                    <div key={`summary-${item.beat_id}-${index}`} className="flex justify-between text-sm">
+                      <span className="text-gray-400 truncate max-w-[150px]">{item.beat_name}</span>
                       <span className="text-white">${item.price.toFixed(2)}</span>
                     </div>
                   ))}
