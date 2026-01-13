@@ -128,14 +128,16 @@ export const Header = () => {
 
                 Admin
               </Link>
-              <Button
-              variant="outline"
-              size="sm"
-              className="border-red-600 text-red-500 w-full">
+              <Link to="/cart" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                variant="outline"
+                size="sm"
+                className="border-red-600 text-red-500 w-full">
 
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Carrito (0)
-              </Button>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Carrito ({cartCount})
+                </Button>
+              </Link>
             </nav>
           </div>
         }
