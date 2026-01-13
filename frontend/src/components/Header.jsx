@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Music, ShoppingCart, Menu, X } from 'lucide-react';
+import { Music, ShoppingCart, Menu, X, LogOut, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
