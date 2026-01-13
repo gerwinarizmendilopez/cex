@@ -260,9 +260,12 @@ async def resend_verification(email: EmailStr):
         "expires_at": expires_at
     })
     
-    # TODO: Enviar email con SendGrid
+    # Enviar email
+    email_sent = await send_verification_email(email, verification_code)
+    
+    if not email_sent:
+        print(f"Warning: No se pudo enviar email a {email}")
     
     return {
-        "message": "Código de verificación reenviado",
-        "verification_code": verification_code  # REMOVER en producción
+        "message": "Código de verificación reenviado. Revisa tu email."
     }
