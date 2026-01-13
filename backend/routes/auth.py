@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
-from datetime import datetime
+import uuid
+import httpx
+from datetime import datetime, timedelta, timezone
 from auth.security import (
     verify_password, 
     get_password_hash, 
@@ -17,7 +19,7 @@ from auth.security import (
 from services.email_service import send_verification_email
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
