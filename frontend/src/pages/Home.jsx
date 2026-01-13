@@ -81,56 +81,91 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Featured Beats */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
+      {/* Featured Beats - BeatStars Style */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Beats Destacados</h2>
-              <p className="text-gray-400">Los más vendidos esta semana</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[600px]">
+            {/* Left Side - Text Content */}
+            <div className="space-y-6">
+              <span className="text-gray-400 text-sm tracking-widest font-medium">
+                ESTO ES HOME.
+              </span>
+              
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white leading-none tracking-tight" style={{ fontFamily: "'Arial Black', 'Helvetica Bold', sans-serif" }}>
+                TU PROXIMO HIT ESTA AQUÍ.
+              </h2>
+              
+              <p className="text-gray-400 text-lg max-w-md">
+                Descubre dentro del catálogo el beat perfecto para tu canción.
+              </p>
+              
+              <Link to="/catalogo">
+                <Button 
+                  variant="outline" 
+                  className="border-white/30 text-white hover:bg-white hover:text-black px-8 py-6 text-base rounded-sm transition-all duration-300 group"
+                >
+                  Explorar Catálogo
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </div>
-            <Link to="/catalogo">
-              <Button variant="outline" className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white">
-                Ver Todos
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredBeats.map((beat) => <Card key={beat.id} className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all group">
-                <CardContent className="p-0">
-                  <div className="relative overflow-hidden">
-                    <img src={beat.coverImage}
-                    alt={beat.name}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
-
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button size="lg" className="bg-red-600 hover:bg-red-700">
-                        <Play className="w-5 h-5 mr-2" />
-                        Preview
-                      </Button>
-                    </div>
+            
+            {/* Right Side - Animated Gallery */}
+            <div className="relative h-[500px] lg:h-[600px] overflow-hidden">
+              {/* Gradient overlays for smooth edges */}
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+              
+              <div className="flex gap-4 h-full">
+                {/* Column 1 - Scrolls Down */}
+                <div className="flex-1 overflow-hidden">
+                  <div className="animate-scroll-down flex flex-col gap-4">
+                    {[...galleryImages.slice(0, 3), ...galleryImages.slice(0, 3)].map((img, idx) => (
+                      <div key={`col1-${idx}`} className="aspect-square rounded-xl overflow-hidden flex-shrink-0">
+                        <img 
+                          src={img} 
+                          alt={`Beat ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300?text=🎵'; }}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{beat.name}</h3>
-                    <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-                      <span>{beat.bpm} BPM</span>
-                      <span>{beat.genre}</span>
-                      <span>{beat.key}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-red-500">${beat.prices.basica}</span>
-                      <Link to={`/beat/${beat.id}`}>
-                        <Button size="sm" className="bg-red-600 hover:bg-red-700">
-                          Ver Beat
-                        </Button>
-                      </Link>
-                    </div>
+                </div>
+                
+                {/* Column 2 - Scrolls Up */}
+                <div className="flex-1 overflow-hidden">
+                  <div className="animate-scroll-up flex flex-col gap-4">
+                    {[...galleryImages.slice(3, 6), ...galleryImages.slice(3, 6)].map((img, idx) => (
+                      <div key={`col2-${idx}`} className="aspect-square rounded-xl overflow-hidden flex-shrink-0">
+                        <img 
+                          src={img} 
+                          alt={`Beat ${idx + 4}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300?text=🎵'; }}
+                        />
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+                
+                {/* Column 3 - Scrolls Down */}
+                <div className="flex-1 overflow-hidden">
+                  <div className="animate-scroll-down-slow flex flex-col gap-4">
+                    {[...galleryImages.slice(6, 9), ...galleryImages.slice(6, 9)].map((img, idx) => (
+                      <div key={`col3-${idx}`} className="aspect-square rounded-xl overflow-hidden flex-shrink-0">
+                        <img 
+                          src={img} 
+                          alt={`Beat ${idx + 7}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300?text=🎵'; }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
