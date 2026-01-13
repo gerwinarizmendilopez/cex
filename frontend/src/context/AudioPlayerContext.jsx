@@ -102,10 +102,13 @@ export const AudioPlayerProvider = ({ children }) => {
 
   const seek = useCallback((time) => {
     const audio = audioRef.current;
-    if (audio) {
-      console.log('Seek called with time:', time, 'duration:', duration);
-      audio.currentTime = time;
-      setCurrentTime(time);
+    if (audio && !isNaN(time) && time >= 0) {
+      try {
+        audio.currentTime = Math.min(time, audio.duration || Infinity);
+        setCurrentTime(audio.currentTime);
+      } catch (e) {
+        console.error('Error seeking:', e);
+      }
     }
   }, []);
 
