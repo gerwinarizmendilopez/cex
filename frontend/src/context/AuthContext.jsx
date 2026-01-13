@@ -103,11 +103,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    // Limpiar localStorage PRIMERO
+    // Limpiar localStorage (token y carrito) por privacidad
     localStorage.removeItem('home_token');
+    localStorage.removeItem('home_cart');
     
     setToken(null);
     setUser(null);
+    
+    // Recargar la página para limpiar todo el estado
+    window.location.reload();
   };
 
   return (
