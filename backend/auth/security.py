@@ -41,6 +41,9 @@ class User(BaseModel):
     email: EmailStr
     is_admin: bool = False
     is_verified: bool = False
+    name: Optional[str] = None
+    picture: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
