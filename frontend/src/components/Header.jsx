@@ -9,6 +9,7 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { getCartCount } = useCart();
+  const { user, logout } = useAuth();
   const cartCount = getCartCount();
 
   const isActive = (path) => location.pathname === path;
