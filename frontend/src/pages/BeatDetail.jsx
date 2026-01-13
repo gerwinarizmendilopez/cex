@@ -12,6 +12,7 @@ export const BeatDetail = () => {
   const { id } = useParams();
   const beat = mockBeats.find(b => b.id === id);
   const [selectedLicense, setSelectedLicense] = useState('basica');
+  const { addToCart, isInCart } = useCart();
 
   if (!beat) {
     return (
