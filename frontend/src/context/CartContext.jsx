@@ -1,5 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { toast } from 'sonner';
+import { useAuth } from './AuthContext';
+
+const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 const CartContext = createContext();
 
@@ -12,75 +16,138 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(() => {
-    // Cargar carrito desde localStorage
-    const savedCart = localStorage.getItem('home_cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
-  // Guardar carrito en localStorage cuando cambie
+  // Cargar carrito cuando el usuario se autentica
   useEffect(() => {
-    localStorage.setItem('home_cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (isAuthenticated && user?.email) {
+      loadUserCart();
+    } else {
+      // Usuario no autenticado: carrito vacío (no usar localStorage)
+      setCartItems([]);
+    }
+  }, [isAuthenticated, user?.email]);
 
-  const addToCart = (beat, licenseType) => {
-    const existingItem = cartItems.find(
-      item => item.beat.id === beat.id && item.licenseType === licenseType
-    );
+  // Cargar carrito del usuario desde el backend
+  const loadUserCart = async () => {
+    if (!user?.email) return;
+    
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API}/cart/${encodeURIComponent(user.email)}`);
+      const items = response.data.items || [];
+      setCartItems(items);
+    } catch (error) {
+      console.error('Error cargando carrito:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (existingItem) {
-      toast.info('Este beat ya está en tu carrito');
+  // Guardar carrito en el backend
+  const saveUserCart = useCallback(async (items) => {
+    if (!user?.email) return;
+    
+    try {
+      await axios.post(`${API}/cart/save`, {
+        user_email: user.email,
+        items: items
+      });
+    } catch (error) {
+      console.error('Error guardando carrito:', error);
+    }
+  }, [user?.email]);
+
+  const addToCart = useCallback((beat, licenseType) => {
+    // Verificar si el usuario está logueado
+    if (!isAuthenticated) {
+      toast.error('Debes iniciar sesión para agregar al carrito');
       return;
     }
 
+    const price = beat.prices[licenseType];
+    
     const newItem = {
-      id: `${beat.id}-${licenseType}`,
-      beat,
-      licenseType,
-      price: beat.prices[licenseType],
-      addedAt: new Date().toISOString()
+      beat_id: beat.id,
+      beat_name: beat.name,
+      cover_image: beat.coverImage,
+      license_type: licenseType,
+      price: price
     };
 
-    setCartItems([...cartItems, newItem]);
-    toast.success(`${beat.name} añadido al carrito`, {
-      description: `Licencia ${licenseType}`
+    setCartItems(prevItems => {
+      // Verificar si ya existe
+      const exists = prevItems.some(
+        item => item.beat_id === beat.id && item.license_type === licenseType
+      );
+      
+      if (exists) {
+        toast.info('Este beat ya está en tu carrito con esta licencia');
+        return prevItems;
+      }
+      
+      const newItems = [...prevItems, newItem];
+      
+      // Guardar en backend
+      saveUserCart(newItems);
+      
+      toast.success(`"${beat.name}" agregado al carrito`, {
+        description: `Licencia ${licenseType} - $${price}`
+      });
+      
+      return newItems;
     });
-  };
+  }, [isAuthenticated, saveUserCart]);
 
-  const removeFromCart = (itemId) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
-    toast.success('Beat eliminado del carrito');
-  };
+  const removeFromCart = useCallback(async (beatId, licenseType) => {
+    if (!user?.email) return;
 
-  const clearCart = () => {
+    setCartItems(prevItems => {
+      const newItems = prevItems.filter(
+        item => !(item.beat_id === beatId && item.license_type === licenseType)
+      );
+      
+      // Guardar en backend
+      saveUserCart(newItems);
+      
+      return newItems;
+    });
+    
+    toast.success('Item eliminado del carrito');
+  }, [user?.email, saveUserCart]);
+
+  const clearCart = useCallback(async () => {
+    if (user?.email) {
+      try {
+        await axios.delete(`${API}/cart/${encodeURIComponent(user.email)}`);
+      } catch (error) {
+        console.error('Error vaciando carrito:', error);
+      }
+    }
     setCartItems([]);
-    localStorage.removeItem('home_cart');
-    toast.success('Carrito vaciado');
-  };
+  }, [user?.email]);
 
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price, 0);
-  };
-
-  const getCartCount = () => {
-    return cartItems.length;
-  };
-
-  const isInCart = (beatId, licenseType) => {
+  const isInCart = useCallback((beatId, licenseType) => {
     return cartItems.some(
-      item => item.beat.id === beatId && item.licenseType === licenseType
+      item => item.beat_id === beatId && item.license_type === licenseType
     );
-  };
+  }, [cartItems]);
+
+  const cartTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const cartCount = cartItems.length;
 
   return (
     <CartContext.Provider
       value={{
         cartItems,
+        cartCount,
+        cartTotal,
+        loading,
         addToCart,
         removeFromCart,
         clearCart,
-        getCartTotal,
-        getCartCount,
         isInCart
       }}
     >
