@@ -103,6 +103,7 @@ class ConfirmPaymentRequest(BaseModel):
     beat_id: str
     license_type: str
     buyer_email: EmailStr
+    buyer_name: str = ""
 
 
 @router.post("/confirm-payment")
