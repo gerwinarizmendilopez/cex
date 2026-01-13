@@ -83,9 +83,9 @@ export const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-4">Contacto</h3>
             <div className="space-y-2">
-              <a href="mailto:contacto@beatmarket.com" className="text-gray-400 hover:text-red-500 text-sm flex items-center transition-colors">
+              <a href="mailto:contacto@home.store.com" className="text-gray-400 hover:text-red-500 text-sm flex items-center transition-colors">
                 <Mail className="w-4 h-4 mr-2" />
-                contacto@beatmarket.com
+                contacto@home.store.com
               </a>
               <p className="text-gray-400 text-sm">
                 Respuesta en 24-48 horas
