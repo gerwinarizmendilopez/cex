@@ -74,6 +74,12 @@ async def get_user_by_email(email: str) -> Optional[UserInDB]:
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
     """Obtener usuario actual desde el token"""
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No autenticado"
+        )
+    
     token = credentials.credentials
     token_data = decode_access_token(token)
     
@@ -93,7 +99,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     return User(
         email=user.email,
         is_admin=user.is_admin,
-        is_verified=user.is_verified
+        is_verified=user.is_verified,
+        name=user.name,
+        picture=user.picture,
+        user_id=user.user_id
     )
 
 
