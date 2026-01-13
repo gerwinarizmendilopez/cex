@@ -16,7 +16,7 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
         
         from_email = Email(FROM_EMAIL)
         to_email = To(to_email)
-        subject = "Verifica tu cuenta en V CLUB"
+        subject = "Verifica tu cuenta en HØME"
         
         # HTML content
         html_content = f"""
@@ -42,6 +42,10 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
                     text-align: center;
                     margin-bottom: 30px;
                 }}
+                .logo img {{
+                    width: 80px;
+                    height: 80px;
+                }}
                 .code {{
                     background-color: #dc2626;
                     color: #ffffff;
@@ -62,6 +66,8 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
                 h1 {{
                     color: #dc2626;
                     text-align: center;
+                    font-size: 36px;
+                    margin: 0;
                 }}
                 p {{
                     color: #d1d5db;
@@ -72,14 +78,15 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
         <body>
             <div class="container">
                 <div class="logo">
-                    <h1>V CLUB</h1>
+                    <img src="https://customer-assets.emergentagent.com/job_beatmarket-43/artifacts/nqptbjvc_Sin%20t%C3%ADtulo-1-Recuperado-Recuperado%20%281%29.png" alt="HØME Logo">
+                    <h1>HØME</h1>
                 </div>
                 
                 <h2 style="text-align: center;">Verifica tu cuenta</h2>
                 
                 <p>Hola,</p>
                 
-                <p>Gracias por registrarte en V CLUB. Para completar tu registro, por favor usa el siguiente código de verificación:</p>
+                <p>Gracias por registrarte en HØME. Para completar tu registro, por favor usa el siguiente código de verificación:</p>
                 
                 <div class="code">{verification_code}</div>
                 
@@ -88,7 +95,7 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
                 <p>Si no creaste esta cuenta, puedes ignorar este email.</p>
                 
                 <div class="footer">
-                    <p>© 2025 V CLUB. Beats que te hacen ganar dinero.</p>
+                    <p>© 2025 HØME. Beats que te hacen ganar dinero.</p>
                     <p>Este es un email automático, por favor no respondas.</p>
                 </div>
             </div>
@@ -98,7 +105,7 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
         
         # Plain text content
         plain_content = f"""
-        Verifica tu cuenta en V CLUB
+        Verifica tu cuenta en HØME
         
         Tu código de verificación es: {verification_code}
         
@@ -106,7 +113,7 @@ async def send_verification_email(to_email: str, verification_code: str) -> bool
         
         Si no creaste esta cuenta, puedes ignorar este email.
         
-        © 2025 V CLUB
+        © 2025 HØME
         """
         
         content = Content("text/html", html_content)
