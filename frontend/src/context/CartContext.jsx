@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 import { toast } from 'sonner';
-import { useAuth } from './AuthContext';
-
-const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 const CartContext = createContext();
 
@@ -17,56 +13,29 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(true);
 
-  // Cargar carrito cuando el usuario se autentica
+  // Cargar carrito desde localStorage al iniciar
   useEffect(() => {
-    if (isAuthenticated && user?.email) {
-      loadUserCart();
-    } else {
-      // Usuario no autenticado: carrito vacío (no usar localStorage)
-      setCartItems([]);
+    const savedCart = localStorage.getItem('home_cart');
+    if (savedCart) {
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch (e) {
+        console.error('Error parsing cart:', e);
+      }
     }
-  }, [isAuthenticated, user?.email]);
+    setLoading(false);
+  }, []);
 
-  // Cargar carrito del usuario desde el backend
-  const loadUserCart = async () => {
-    if (!user?.email) return;
-    
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API}/cart/${encodeURIComponent(user.email)}`);
-      const items = response.data.items || [];
-      setCartItems(items);
-    } catch (error) {
-      console.error('Error cargando carrito:', error);
-    } finally {
-      setLoading(false);
+  // Guardar carrito en localStorage cuando cambie
+  useEffect(() => {
+    if (!loading) {
+      localStorage.setItem('home_cart', JSON.stringify(cartItems));
     }
-  };
-
-  // Guardar carrito en el backend
-  const saveUserCart = useCallback(async (items) => {
-    if (!user?.email) return;
-    
-    try {
-      await axios.post(`${API}/cart/save`, {
-        user_email: user.email,
-        items: items
-      });
-    } catch (error) {
-      console.error('Error guardando carrito:', error);
-    }
-  }, [user?.email]);
+  }, [cartItems, loading]);
 
   const addToCart = useCallback((beat, licenseType) => {
-    // Verificar si el usuario está logueado
-    if (!isAuthenticated) {
-      toast.error('Debes iniciar sesión para agregar al carrito');
-      return;
-    }
-
     const price = beat.prices[licenseType];
     
     const newItem = {
@@ -78,7 +47,6 @@ export const CartProvider = ({ children }) => {
     };
 
     setCartItems(prevItems => {
-      // Verificar si ya existe
       const exists = prevItems.some(
         item => item.beat_id === beat.id && item.license_type === licenseType
       );
@@ -88,46 +56,25 @@ export const CartProvider = ({ children }) => {
         return prevItems;
       }
       
-      const newItems = [...prevItems, newItem];
-      
-      // Guardar en backend
-      saveUserCart(newItems);
-      
       toast.success(`"${beat.name}" agregado al carrito`, {
         description: `Licencia ${licenseType} - $${price}`
       });
       
-      return newItems;
+      return [...prevItems, newItem];
     });
-  }, [isAuthenticated, saveUserCart]);
+  }, []);
 
-  const removeFromCart = useCallback(async (beatId, licenseType) => {
-    if (!user?.email) return;
-
-    setCartItems(prevItems => {
-      const newItems = prevItems.filter(
-        item => !(item.beat_id === beatId && item.license_type === licenseType)
-      );
-      
-      // Guardar en backend
-      saveUserCart(newItems);
-      
-      return newItems;
-    });
-    
+  const removeFromCart = useCallback((beatId, licenseType) => {
+    setCartItems(prevItems => 
+      prevItems.filter(item => !(item.beat_id === beatId && item.license_type === licenseType))
+    );
     toast.success('Item eliminado del carrito');
-  }, [user?.email, saveUserCart]);
+  }, []);
 
-  const clearCart = useCallback(async () => {
-    if (user?.email) {
-      try {
-        await axios.delete(`${API}/cart/${encodeURIComponent(user.email)}`);
-      } catch (error) {
-        console.error('Error vaciando carrito:', error);
-      }
-    }
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  }, [user?.email]);
+    localStorage.removeItem('home_cart');
+  }, []);
 
   const isInCart = useCallback((beatId, licenseType) => {
     return cartItems.some(
