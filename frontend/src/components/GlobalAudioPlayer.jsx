@@ -46,15 +46,19 @@ export const GlobalAudioPlayer = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/95 backdrop-blur-md border-t border-red-900/30">
       <div className="max-w-7xl mx-auto">
-        {/* Progress Bar - Clickable */}
-        <div className="px-4 pt-2">
-          <Slider
-            value={[progress]}
-            max={100}
-            step={0.1}
-            onValueChange={handleSeek}
-            className="w-full cursor-pointer"
-          />
+        {/* Progress Bar - Clickable and more visible */}
+        <div className="px-4 pt-3 pb-1">
+          <div className="flex items-center gap-3 text-xs text-gray-400">
+            <span className="w-10 text-right">{formatTime(currentTime)}</span>
+            <Slider
+              value={[progress]}
+              max={100}
+              step={0.1}
+              onValueChange={handleSeek}
+              className="flex-1 cursor-pointer [&>span:first-child]:h-2 [&>span:first-child]:bg-zinc-700 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:bg-red-500 [&>span:first-child>span]:bg-red-500"
+            />
+            <span className="w-10">{formatTime(duration)}</span>
+          </div>
         </div>
         
         <div className="flex items-center justify-between px-4 py-3">
