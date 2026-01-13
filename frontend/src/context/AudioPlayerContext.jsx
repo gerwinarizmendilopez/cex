@@ -16,8 +16,9 @@ export const AudioPlayerProvider = ({ children }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [isSeeking, setIsSeeking] = useState(false);
+  
   const audioRef = useRef(null);
+  const isSeekingRef = useRef(false); // Usar ref en lugar de state
 
   useEffect(() => {
     const audio = new Audio();
@@ -26,7 +27,7 @@ export const AudioPlayerProvider = ({ children }) => {
     
     const handleTimeUpdate = () => {
       // NO actualizar si el usuario está arrastrando el slider
-      if (!isSeeking) {
+      if (!isSeekingRef.current) {
         setCurrentTime(audio.currentTime);
       }
     };
@@ -57,7 +58,7 @@ export const AudioPlayerProvider = ({ children }) => {
       audio.removeEventListener('error', handleError);
       audio.pause();
     };
-  }, [isSeeking]);
+  }, []); // Sin dependencias - solo se ejecuta una vez
 
   const playBeat = useCallback(async (beat, audioUrl) => {
     const audio = audioRef.current;
@@ -100,23 +101,23 @@ export const AudioPlayerProvider = ({ children }) => {
     }
   }, [currentBeat, isPlaying]);
 
-  // Iniciar seeking - pausar actualizaciones de tiempo
+  // Iniciar seeking
   const startSeeking = useCallback(() => {
-    setIsSeeking(true);
+    isSeekingRef.current = true;
   }, []);
 
   // Hacer seek real al audio
   const seek = useCallback((time) => {
     const audio = audioRef.current;
-    if (audio && !isNaN(time)) {
-      const clampedTime = Math.max(0, Math.min(time, audio.duration || 0));
+    if (audio && !isNaN(time) && audio.duration) {
+      const clampedTime = Math.max(0, Math.min(time, audio.duration));
       audio.currentTime = clampedTime;
       setCurrentTime(clampedTime);
     }
-    setIsSeeking(false);
+    isSeekingRef.current = false;
   }, []);
 
-  // Actualizar tiempo visual mientras se arrastra (sin afectar el audio)
+  // Actualizar tiempo visual mientras se arrastra
   const updateSeekTime = useCallback((time) => {
     setCurrentTime(time);
   }, []);
@@ -148,7 +149,6 @@ export const AudioPlayerProvider = ({ children }) => {
         currentTime,
         duration,
         volume,
-        isSeeking,
         playBeat,
         togglePlayPause,
         startSeeking,
