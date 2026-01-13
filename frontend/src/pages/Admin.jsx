@@ -126,7 +126,7 @@ export const Admin = () => {
     e.preventDefault();
     
     if (!audioFile) {
-      toast.error('Por favor selecciona un archivo de audio');
+      toast.error('Por favor selecciona un archivo MP3 de exhibición');
       return;
     }
     if (!coverFile) {
@@ -149,6 +149,16 @@ export const Admin = () => {
       formData.append('audio_file', audioFile);
       formData.append('cover_file', coverFile);
       
+      // Agregar WAV si existe
+      if (wavFile) {
+        formData.append('wav_file', wavFile);
+      }
+      
+      // Agregar stems si existe
+      if (stemsFile) {
+        formData.append('stems_file', stemsFile);
+      }
+      
       await axios.post(`${API}/beats/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -159,8 +169,12 @@ export const Admin = () => {
       setNewBeat({ name: '', bpm: '', key: '', mood: '', genre: '', priceBasica: '', pricePremium: '', priceExclusiva: '' });
       setAudioFile(null);
       setCoverFile(null);
+      setWavFile(null);
+      setStemsFile(null);
       setAudioPreview(null);
       setCoverPreview(null);
+      setWavPreview(null);
+      setStemsPreview(null);
       fetchBeats();
       
     } catch (error) {
