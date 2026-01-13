@@ -62,14 +62,21 @@ export const Header = () => {
 
           {/* Cart Button */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white transition-colors">
+            <Link to="/cart">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-red-600 text-red-500 hover:bg-red-600 hover:text-white transition-colors relative">
 
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Carrito (0)
-            </Button>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Carrito ({cartCount})
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
