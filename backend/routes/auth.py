@@ -139,13 +139,15 @@ async def register(request: RegisterRequest):
     
     await db.users.insert_one(user)
     
-    # TODO: Enviar email con código de verificación usando SendGrid
-    # Por ahora devolvemos el código (solo para desarrollo)
+    # Enviar email con código de verificación
+    email_sent = await send_verification_email(request.email, verification_code)
+    
+    if not email_sent:
+        print(f"Warning: No se pudo enviar email a {request.email}")
     
     return {
-        "message": "Usuario registrado. Verifica tu email.",
-        "email": request.email,
-        "verification_code": verification_code  # REMOVER en producción
+        "message": "Usuario registrado. Revisa tu email para verificar tu cuenta.",
+        "email": request.email
     }
 
 
