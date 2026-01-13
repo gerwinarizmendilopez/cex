@@ -32,7 +32,7 @@ const licenseNames = {
   exclusiva: 'Exclusiva'
 };
 
-const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
+const CheckoutForm = ({ cartItems, cartTotal, onSuccess, navigate }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -72,6 +72,9 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
 
     setProcessing(true);
     const buyerName = `${firstName} ${lastName}`;
+    
+    // Guardar info de la última compra para la página de éxito
+    let lastPurchasedItem = null;
 
     try {
       for (const item of cartItems) {
@@ -110,6 +113,13 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
           accept_promos: acceptPromos
         });
 
+        // Guardar el último item comprado
+        lastPurchasedItem = {
+          beat_id: item.beat_id,
+          license_type: item.license_type,
+          purchase_id: confirmResponse.data.sale_id || result.paymentIntent.id
+        };
+
         if (confirmResponse.data.exclusive) {
           toast.success('¡Licencia Exclusiva Adquirida!', {
             description: 'El beat ha sido retirado del catálogo.'
@@ -117,11 +127,15 @@ const CheckoutForm = ({ cartItems, cartTotal, onSuccess }) => {
         }
       }
 
-      toast.success('¡Compra exitosa!', {
-        description: 'Recibirás tus beats por email en breve'
-      });
+      toast.success('¡Compra exitosa!');
       
+      // Limpiar carrito y redirigir a página de éxito
       onSuccess();
+      
+      // Redirigir a la página de confirmación con los parámetros
+      if (lastPurchasedItem) {
+        navigate(`/purchase-success?beat_id=${lastPurchasedItem.beat_id}&license=${lastPurchasedItem.license_type}&purchase_id=${lastPurchasedItem.purchase_id}`);
+      }
     } catch (error) {
       console.error('Error procesando pago:', error);
       toast.error('Error al procesar el pago', {
