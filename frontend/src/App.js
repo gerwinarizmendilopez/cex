@@ -42,6 +42,9 @@ function AppRouter() {
         <Route path="/licencias" element={<Licencias />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/purchase-success" element={<PurchaseSuccess />} />
+        <Route path="/terminos" element={<TerminosCondiciones />} />
+        <Route path="/privacidad" element={<PoliticaPrivacidad />} />
+        <Route path="/reembolso" element={<PoliticaReembolso />} />
         <Route path="/login" element={<Login />} />
         <Route 
           path="/admin" 
