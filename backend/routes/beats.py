@@ -235,6 +235,13 @@ async def get_beat(beat_id: str):
     if not beat:
         raise HTTPException(status_code=404, detail="Beat no encontrado")
     
+    wav_url = None
+    stems_url = None
+    if beat.get("wav_filename"):
+        wav_url = f"/api/beats/wav/{beat['wav_filename']}"
+    if beat.get("stems_filename"):
+        stems_url = f"/api/beats/stems/{beat['stems_filename']}"
+    
     return BeatResponse(
         beat_id=beat["beat_id"],
         name=beat["name"],
@@ -247,6 +254,8 @@ async def get_beat(beat_id: str):
         price_exclusiva=beat["price_exclusiva"],
         audio_url=f"/api/beats/audio/{beat['audio_filename']}",
         cover_url=f"/api/beats/cover/{beat['cover_filename']}",
+        wav_url=wav_url,
+        stems_url=stems_url,
         plays=beat.get("plays", 0),
         sales=beat.get("sales", 0),
         created_at=beat["created_at"],
