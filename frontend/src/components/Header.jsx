@@ -18,8 +18,12 @@ export const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105">
-              <Music className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 flex items-center justify-center transition-transform group-hover:scale-105">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_beatmarket-43/artifacts/7mofy2kc_holaaaa.png" 
+                alt="V CLUB Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="!font-bold !text-xl text-white"></span>
           </Link>
