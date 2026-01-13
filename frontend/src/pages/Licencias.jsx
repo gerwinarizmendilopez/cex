@@ -20,7 +20,7 @@ export const Licencias = () => {
           {/* Basica */}
           <Card className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-2xl font-bold mb-2">{licenseTypes.basica.name}</CardTitle>
+              <CardTitle className="text-2xl font-bold mb-2 text-white">{licenseTypes.basica.name}</CardTitle>
               <p className="text-gray-400 text-sm mb-4">Para lanzamientos digitales</p>
               <div className="text-4xl font-bold text-red-500">$29+</div>
               <p className="text-sm text-gray-400 mt-2">Precio variable por beat</p>
@@ -61,7 +61,7 @@ export const Licencias = () => {
               </span>
             </div>
             <CardHeader className="text-center pb-8 pt-8">
-              <CardTitle className="text-2xl font-bold mb-2">{licenseTypes.premium.name}</CardTitle>
+              <CardTitle className="text-2xl font-bold mb-2 text-white">{licenseTypes.premium.name}</CardTitle>
               <p className="text-gray-400 text-sm mb-4">Para artistas serios</p>
               <div className="text-4xl font-bold text-red-500">$79+</div>
               <p className="text-sm text-gray-400 mt-2">Precio variable por beat</p>
@@ -97,7 +97,7 @@ export const Licencias = () => {
           {/* Exclusiva */}
           <Card className="bg-zinc-900 border-red-900/20 hover:border-red-600/50 transition-all">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-2xl font-bold mb-2">{licenseTypes.exclusiva.name}</CardTitle>
+              <CardTitle className="text-2xl font-bold mb-2 text-white">{licenseTypes.exclusiva.name}</CardTitle>
               <p className="text-gray-400 text-sm mb-4">Derechos completos</p>
               <div className="text-4xl font-bold text-red-500">$299+</div>
               <p className="text-sm text-gray-400 mt-2">Precio variable por beat</p>
@@ -125,7 +125,7 @@ export const Licencias = () => {
           <div className="space-y-6">
             <Card className="bg-zinc-900 border-red-900/20">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">¿Cómo funciona la descarga?</h3>
+                <h3 className="text-lg font-semibold mb-2 text-white">¿Cómo funciona la descarga?</h3>
                 <p className="text-gray-400">
                   Después de completar la compra, recibirás un email instantáneo con el enlace de descarga. 
                   Incluye el beat en MP3/WAV y el contrato de licencia en PDF.
@@ -135,7 +135,7 @@ export const Licencias = () => {
 
             <Card className="bg-zinc-900 border-red-900/20">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">¿Puedo subir el beat a Spotify?</h3>
+                <h3 className="text-lg font-semibold mb-2 text-white">¿Puedo subir el beat a Spotify?</h3>
                 <p className="text-gray-400">
                   Sí. Con las licencias Premium y Exclusiva puedes distribuir en todas las plataformas digitales 
                   (Spotify, Apple Music, etc.) sin límite de streams.
@@ -145,7 +145,7 @@ export const Licencias = () => {
 
             <Card className="bg-zinc-900 border-red-900/20">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">¿Qué pasa si compro licencia exclusiva?</h3>
+                <h3 className="text-lg font-semibold mb-2 text-white">¿Qué pasa si compro licencia exclusiva?</h3>
                 <p className="text-gray-400">
                   El beat se retira del catálogo y nadie más puede comprarlo. Obtienes derechos completos 
                   sobre el beat, incluyendo todos los archivos y el registro de copyright.
@@ -155,7 +155,7 @@ export const Licencias = () => {
 
             <Card className="bg-zinc-900 border-red-900/20">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">¿Hay reembolsos?</h3>
+                <h3 className="text-lg font-semibold mb-2 text-white">¿Hay reembolsos?</h3>
                 <p className="text-gray-400">
                   Debido a la naturaleza digital del producto, no ofrecemos reembolsos. Sin embargo, 
                   puedes escuchar el preview completo antes de comprar para asegurarte de que es lo que buscas.
@@ -165,7 +165,7 @@ export const Licencias = () => {
 
             <Card className="bg-zinc-900 border-red-900/20">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-2">¿Qué métodos de pago aceptan?</h3>
+                <h3 className="text-lg font-semibold mb-2 text-white">¿Qué métodos de pago aceptan?</h3>
                 <p className="text-gray-400">
                   Aceptamos Stripe (tarjetas de crédito/débito), PayPal y Mercado Pago. 
                   Todos los pagos son 100% seguros y encriptados.
