@@ -75,13 +75,36 @@ export const Admin = () => {
   const handleAudioChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
-      if (!validTypes.includes(file.type) && !file.name.match(/\.(mp3|wav)$/i)) {
-        toast.error('Por favor selecciona un archivo MP3 o WAV');
+      if (!file.name.match(/\.mp3$/i)) {
+        toast.error('Por favor selecciona un archivo MP3 para exhibición');
         return;
       }
       setAudioFile(file);
       setAudioPreview(file.name);
+    }
+  };
+
+  const handleWavChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.name.match(/\.wav$/i)) {
+        toast.error('Por favor selecciona un archivo WAV');
+        return;
+      }
+      setWavFile(file);
+      setWavPreview(file.name);
+    }
+  };
+
+  const handleStemsChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.name.match(/\.(rar|zip)$/i)) {
+        toast.error('Por favor selecciona un archivo RAR o ZIP para los stems');
+        return;
+      }
+      setStemsFile(file);
+      setStemsPreview(file.name);
     }
   };
 
