@@ -102,11 +102,12 @@ export const AudioPlayerProvider = ({ children }) => {
 
   const seek = useCallback((time) => {
     const audio = audioRef.current;
-    if (audio && duration) {
+    if (audio) {
+      console.log('Seek called with time:', time, 'duration:', duration);
       audio.currentTime = time;
       setCurrentTime(time);
     }
-  }, [duration]);
+  }, []);
 
   const seekPercentage = useCallback((percentage) => {
     const newTime = (percentage / 100) * duration;
