@@ -338,6 +338,7 @@ export const Cart = () => {
   const { cartItems, cartTotal, removeFromCart, clearCart, loading } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [stripeLoaded, setStripeLoaded] = useState(false);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const loadStripeConfig = async () => {
