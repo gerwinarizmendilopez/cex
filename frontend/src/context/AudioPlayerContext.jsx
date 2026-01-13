@@ -18,33 +18,40 @@ export const AudioPlayerProvider = ({ children }) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
   const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const wavesurferRef = useRef(null);
   const containerRef = useRef(null);
+  const pendingBeatRef = useRef(null);
 
-  // Inicializar WaveSurfer cuando el container esté listo
-  const initWaveSurfer = useCallback((container) => {
-    if (!container || wavesurferRef.current) return;
-    
+  // Crear WaveSurfer cuando el container esté disponible
+  const setWaveformContainer = useCallback((container) => {
+    if (!container) return;
     containerRef.current = container;
+    
+    // Destruir instancia anterior si existe
+    if (wavesurferRef.current) {
+      wavesurferRef.current.destroy();
+    }
     
     const ws = WaveSurfer.create({
       container: container,
-      waveColor: '#4a4a4a',
+      waveColor: '#525252',
       progressColor: '#dc2626',
-      cursorColor: '#fff',
+      cursorColor: '#ffffff',
       cursorWidth: 2,
       barWidth: 3,
       barGap: 2,
-      barRadius: 3,
-      height: 50,
+      barRadius: 2,
+      height: 60,
       normalize: true,
-      backend: 'WebAudio',
+      interact: true,
     });
     
     ws.on('ready', () => {
       setDuration(ws.getDuration());
       setIsReady(true);
+      setIsLoading(false);
       ws.setVolume(volume);
     });
     
@@ -56,48 +63,64 @@ export const AudioPlayerProvider = ({ children }) => {
       setCurrentTime(ws.getCurrentTime());
     });
     
+    ws.on('interaction', () => {
+      setCurrentTime(ws.getCurrentTime());
+    });
+    
     ws.on('finish', () => {
       setIsPlaying(false);
-      setCurrentTime(0);
     });
     
     ws.on('play', () => setIsPlaying(true));
     ws.on('pause', () => setIsPlaying(false));
     
+    ws.on('error', (err) => {
+      console.error('WaveSurfer error:', err);
+      setIsLoading(false);
+    });
+    
     wavesurferRef.current = ws;
+    
+    // Si hay un beat pendiente, cargarlo
+    if (pendingBeatRef.current) {
+      const { beat, audioUrl } = pendingBeatRef.current;
+      pendingBeatRef.current = null;
+      loadAndPlay(beat, audioUrl, ws);
+    }
   }, [volume]);
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (wavesurferRef.current) {
-        wavesurferRef.current.destroy();
-        wavesurferRef.current = null;
-      }
-    };
-  }, []);
-
-  const playBeat = useCallback(async (beat, audioUrl) => {
-    const ws = wavesurferRef.current;
-    if (!ws) return;
-    
-    // Si es el mismo beat, toggle play/pause
-    if (currentBeat?.beat_id === beat.beat_id) {
-      ws.playPause();
-      return;
-    }
-    
-    // Nuevo beat
-    setCurrentBeat(beat);
+  const loadAndPlay = async (beat, audioUrl, ws) => {
+    setIsLoading(true);
     setIsReady(false);
     setCurrentTime(0);
-    setDuration(0);
     
     try {
       await ws.load(audioUrl);
       ws.play();
     } catch (error) {
       console.error('Error loading audio:', error);
+      setIsLoading(false);
+    }
+  };
+
+  const playBeat = useCallback(async (beat, audioUrl) => {
+    const ws = wavesurferRef.current;
+    
+    // Si es el mismo beat, toggle play/pause
+    if (currentBeat?.beat_id === beat.beat_id && ws) {
+      ws.playPause();
+      return;
+    }
+    
+    // Nuevo beat
+    setCurrentBeat(beat);
+    setDuration(0);
+    
+    if (ws) {
+      loadAndPlay(beat, audioUrl, ws);
+    } else {
+      // Guardar para cuando el container esté listo
+      pendingBeatRef.current = { beat, audioUrl };
     }
   }, [currentBeat]);
 
@@ -107,13 +130,6 @@ export const AudioPlayerProvider = ({ children }) => {
       ws.playPause();
     }
   }, [isReady]);
-
-  const seek = useCallback((time) => {
-    const ws = wavesurferRef.current;
-    if (ws && duration > 0) {
-      ws.seekTo(time / duration);
-    }
-  }, [duration]);
 
   const changeVolume = useCallback((newVolume) => {
     setVolume(newVolume);
@@ -134,6 +150,16 @@ export const AudioPlayerProvider = ({ children }) => {
     setDuration(0);
     setCurrentBeat(null);
     setIsReady(false);
+    setIsLoading(false);
+  }, []);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+      }
+    };
   }, []);
 
   return (
@@ -145,13 +171,12 @@ export const AudioPlayerProvider = ({ children }) => {
         duration,
         volume,
         isReady,
+        isLoading,
         playBeat,
         togglePlayPause,
-        seek,
         changeVolume,
         stopPlayback,
-        initWaveSurfer,
-        wavesurferRef
+        setWaveformContainer
       }}
     >
       {children}
