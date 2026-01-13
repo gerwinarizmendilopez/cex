@@ -14,13 +14,13 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     // Cargar carrito desde localStorage
-    const savedCart = localStorage.getItem('vclub_cart');
+    const savedCart = localStorage.getItem('home_cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
   // Guardar carrito en localStorage cuando cambie
   useEffect(() => {
-    localStorage.setItem('vclub_cart', JSON.stringify(cartItems));
+    localStorage.setItem('home_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (beat, licenseType) => {
