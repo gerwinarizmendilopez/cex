@@ -236,7 +236,7 @@ async def send_purchase_confirmation_email(
                 <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
                 
                 <div class="footer">
-                    <p>© 2025 V CLUB. Beats que te hacen ganar dinero.</p>
+                    <p>© 2025 HØME. Beats que te hacen ganar dinero.</p>
                     <p>home.recordsinfo@gmail.com</p>
                 </div>
             </div>
