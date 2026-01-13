@@ -17,7 +17,7 @@ export const Login = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [registeredEmail, setRegisteredEmail] = useState('');
 
-  const { login, register, verifyEmail, resendVerification } = useAuth();
+  const { login, register, verifyEmail, resendVerification, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
