@@ -329,22 +329,13 @@ export const BeatDetail = () => {
 
               <Button 
                 size="lg" 
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg mb-4"
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg"
                 onClick={handleAddToCart}
                 disabled={inCart}
+                data-testid="add-to-cart-button"
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 {inCart ? 'Ya está en el carrito' : `Añadir al Carrito - $${beat[`price_${selectedLicense}`]}`}
-              </Button>
-
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="w-full border-red-600 text-red-500 hover:bg-red-600 hover:text-white py-6 text-lg"
-                onClick={handlePurchase}
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Comprar Ahora - ${beat[`price_${selectedLicense}`]}
               </Button>
 
               <div className="mt-6 p-4 bg-zinc-900 border border-red-900/20 rounded-lg">
