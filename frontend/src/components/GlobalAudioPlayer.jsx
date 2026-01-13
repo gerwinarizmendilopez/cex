@@ -31,13 +31,17 @@ export const GlobalAudioPlayer = () => {
 
   // Manejar click/drag en la barra de progreso
   const handleProgressClick = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!progressBarRef.current || !duration) return;
     
     const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
+    const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const percentage = clickX / rect.width;
     const newTime = percentage * duration;
     
+    console.log(`Seeking to ${newTime.toFixed(1)}s (${(percentage * 100).toFixed(1)}%)`);
     seek(Math.max(0, Math.min(newTime, duration)));
   }, [duration, seek]);
 
