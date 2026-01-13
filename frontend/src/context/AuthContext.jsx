@@ -20,21 +20,34 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('home_token'));
 
   useEffect(() => {
-    if (token) {
-      verifyToken();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
+    // Verificar token JWT existente o sesión de Google
+    checkAuth();
+  }, []);
 
-  const verifyToken = async () => {
+  const checkAuth = async () => {
     try {
-      const response = await axios.get(`${API}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUser(response.data);
+      // Primero intentar verificar token JWT
+      if (token) {
+        const response = await axios.get(`${API}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(response.data);
+        setLoading(false);
+        return;
+      }
+
+      // Si no hay token JWT, intentar sesión de Google via cookie
+      try {
+        const googleResponse = await axios.get(`${API}/auth/google/me`, {
+          withCredentials: true
+        });
+        setUser(googleResponse.data);
+      } catch (googleError) {
+        // No hay sesión activa, usuario no autenticado
+        setUser(null);
+      }
     } catch (error) {
-      console.error('Token inválido:', error);
+      console.error('Error verificando autenticación:', error);
       logout();
     } finally {
       setLoading(false);
@@ -67,7 +80,38 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
-  const logout = () => {
+  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+  const loginWithGoogle = () => {
+    // Usar window.location.origin para obtener la URL dinámica
+    const redirectUrl = window.location.origin + '/';
+    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  };
+
+  const processGoogleSession = async (sessionId) => {
+    const response = await axios.post(
+      `${API}/auth/google/session`,
+      { session_id: sessionId },
+      { withCredentials: true }
+    );
+    
+    const { access_token, user: userData } = response.data;
+    
+    // Guardar token JWT para mantener compatibilidad
+    setToken(access_token);
+    setUser(userData);
+    localStorage.setItem('home_token', access_token);
+    
+    return userData;
+  };
+
+  const logout = async () => {
+    try {
+      // Intentar cerrar sesión de Google si existe
+      await axios.post(`${API}/auth/google/logout`, {}, { withCredentials: true });
+    } catch (error) {
+      // Ignorar errores de logout de Google
+    }
+    
     setToken(null);
     setUser(null);
     localStorage.removeItem('home_token');
@@ -83,6 +127,8 @@ export const AuthProvider = ({ children }) => {
         register,
         verifyEmail,
         resendVerification,
+        loginWithGoogle,
+        processGoogleSession,
         logout,
         isAuthenticated: !!user,
         isAdmin: user?.is_admin || false
