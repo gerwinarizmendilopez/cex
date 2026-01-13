@@ -126,14 +126,22 @@ async def confirm_payment(request: ConfirmPaymentRequest):
             if not beat:
                 raise HTTPException(status_code=404, detail="Beat no encontrado")
             
+            # Generar un ID único para la venta
+            import uuid
+            sale_id = f"sale_{uuid.uuid4().hex[:12]}"
+            
             # Registrar la venta
             sale = {
+                "sale_id": sale_id,
                 "payment_intent_id": request.payment_intent_id,
                 "beat_id": request.beat_id,
                 "beat_name": beat.get("name"),
                 "license_type": request.license_type,
                 "buyer_email": request.buyer_email,
                 "buyer_name": request.buyer_name,
+                "buyer_phone": request.buyer_phone,
+                "account_type": request.account_type,
+                "accept_promos": request.accept_promos,
                 "amount": payment_intent.amount / 100,
                 "currency": "usd",
                 "created_at": datetime.now(timezone.utc).isoformat()
@@ -163,6 +171,7 @@ async def confirm_payment(request: ConfirmPaymentRequest):
                     "status": "success",
                     "message": "¡Felicidades! Has adquirido los derechos exclusivos de este beat. El beat ha sido retirado del catálogo.",
                     "exclusive": True,
+                    "sale_id": sale_id,
                     "payment_intent_id": request.payment_intent_id,
                     "amount": payment_intent.amount / 100,
                     "beat_id": request.beat_id,
@@ -173,6 +182,7 @@ async def confirm_payment(request: ConfirmPaymentRequest):
                 "status": "success",
                 "message": "Pago confirmado exitosamente",
                 "exclusive": False,
+                "sale_id": sale_id,
                 "payment_intent_id": request.payment_intent_id,
                 "amount": payment_intent.amount / 100,
                 "beat_id": request.beat_id,
