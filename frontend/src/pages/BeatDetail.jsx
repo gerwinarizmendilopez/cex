@@ -120,12 +120,6 @@ export const BeatDetail = () => {
     addToCart(beatForCart, selectedLicense);
   };
 
-  const handlePurchase = () => {
-    toast.success(`¡Compra simulada! Beat "${beat.name}" con licencia ${licenseTypes[selectedLicense].name}`, {
-      description: 'En producción, esto procesará el pago real y enviará el beat por email.'
-    });
-  };
-
   const inCart = isInCart(beat.beat_id, selectedLicense);
 
   return (
