@@ -54,7 +54,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCartItems([]);
-    localStorage.removeItem('vclub_cart');
+    localStorage.removeItem('home_cart');
     toast.success('Carrito vaciado');
   };
 
