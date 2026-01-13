@@ -79,10 +79,24 @@ app.include_router(payment_router)
 # Include auth routes
 app.include_router(auth_router)
 
+# Configure CORS - orígenes específicos para credentials
+cors_origins = os.environ.get('CORS_ORIGINS', '').split(',')
+# Filtrar strings vacíos y agregar orígenes comunes
+if not cors_origins or cors_origins == ['*'] or cors_origins == ['']:
+    cors_origins = [
+        "http://localhost:3000",
+        "https://localhost:3000",
+    ]
+
+# Agregar el dominio de preview si está disponible
+preview_url = os.environ.get('PREVIEW_URL', '')
+if preview_url:
+    cors_origins.append(preview_url)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=["*"],  # Permitir todos los orígenes
     allow_methods=["*"],
     allow_headers=["*"],
 )
