@@ -86,13 +86,6 @@ export const GlobalAudioPlayer = () => {
 
           {/* Controls */}
           <div className="flex items-center gap-4">
-            {/* Time Display */}
-            <div className="text-sm text-gray-400 hidden sm:block">
-              <span>{formatTime(currentTime)}</span>
-              <span className="mx-1">/</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-
             {/* Play/Pause Button */}
             <Button
               size="lg"
@@ -115,7 +108,7 @@ export const GlobalAudioPlayer = () => {
                 max={100}
                 step={1}
                 onValueChange={handleVolumeChange}
-                className="w-24"
+                className="w-24 [&>span:first-child]:h-1.5 [&>span:first-child]:bg-zinc-700 [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:bg-white [&>span:first-child>span]:bg-white"
               />
             </div>
 
