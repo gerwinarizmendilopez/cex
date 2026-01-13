@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Check, Download, Shield, Music2, Clock, Gauge, Sparkles, ShoppingCart, Play, Pause } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import { useCart } from '../context/CartContext';
+import { useAudioPlayer } from '../context/AudioPlayerContext';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
@@ -50,17 +51,11 @@ export const BeatDetail = () => {
   const [beat, setBeat] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedLicense, setSelectedLicense] = useState('basica');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
   const { addToCart, isInCart } = useCart();
+  const { currentBeat, isPlaying, playBeat } = useAudioPlayer();
 
   useEffect(() => {
     fetchBeat();
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
   }, [id]);
 
   const fetchBeat = async () => {
@@ -77,33 +72,16 @@ export const BeatDetail = () => {
 
   const handlePlayPause = async () => {
     if (!beat) return;
-
-    if (isPlaying) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setIsPlaying(false);
-    } else {
-      if (!audioRef.current) {
-        const audioUrl = `${API}/beats/audio/${beat.audio_url.split('/').pop()}`;
-        audioRef.current = new Audio(audioUrl);
-        audioRef.current.onended = () => setIsPlaying(false);
-        audioRef.current.onerror = () => {
-          toast.error('Error al reproducir el audio');
-          setIsPlaying(false);
-        };
-      }
-      
-      try {
-        await audioRef.current.play();
-        setIsPlaying(true);
-        // Registrar play
-        axios.post(`${API}/beats/${beat.beat_id}/play`).catch(() => {});
-      } catch (error) {
-        toast.error('Error al reproducir');
-      }
+    const audioUrl = `${API}/beats/audio/${beat.audio_url.split('/').pop()}`;
+    await playBeat(beat, audioUrl);
+    
+    // Registrar play
+    if (currentBeat?.beat_id !== beat.beat_id) {
+      axios.post(`${API}/beats/${beat.beat_id}/play`).catch(() => {});
     }
   };
+
+  const isCurrentBeatPlaying = currentBeat?.beat_id === beat?.beat_id && isPlaying;
 
   if (loading) {
     return (
@@ -151,7 +129,7 @@ export const BeatDetail = () => {
   const inCart = isInCart(beat.beat_id, selectedLicense);
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24 pb-20">
+    <div className="min-h-screen bg-black text-white pt-24 pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <Link to="/catalogo" className="inline-flex items-center text-gray-400 hover:text-white mb-8 transition-colors">
@@ -180,14 +158,14 @@ export const BeatDetail = () => {
               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                 <Button 
                   size="lg"
-                  className={`rounded-full w-20 h-20 ${isPlaying ? 'bg-white text-black hover:bg-gray-200' : 'bg-red-600 hover:bg-red-700'}`}
+                  className={`rounded-full w-20 h-20 ${isCurrentBeatPlaying ? 'bg-white text-black hover:bg-gray-200' : 'bg-red-600 hover:bg-red-700'}`}
                   onClick={handlePlayPause}
                 >
-                  {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
+                  {isCurrentBeatPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
                 </Button>
               </div>
               {/* Playing Indicator */}
-              {isPlaying && (
+              {isCurrentBeatPlaying && (
                 <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-2 bg-red-600 rounded-full">
                   <div className="flex gap-0.5">
                     <span className="w-1 h-4 bg-white rounded-full animate-pulse"></span>
