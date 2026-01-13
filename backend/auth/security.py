@@ -27,10 +27,14 @@ class TokenData(BaseModel):
 
 class UserInDB(BaseModel):
     email: EmailStr
-    hashed_password: str
+    hashed_password: Optional[str] = None  # Opcional para usuarios de Google
     is_admin: bool = False
     is_verified: bool = False
     created_at: datetime = datetime.utcnow()
+    auth_provider: Optional[str] = "email"  # "email" o "google"
+    name: Optional[str] = None
+    picture: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 class User(BaseModel):
