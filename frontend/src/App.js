@@ -17,6 +17,7 @@ import { Licencias } from "./pages/Licencias";
 import { Admin } from "./pages/Admin";
 import { Cart } from "./pages/Cart";
 import { Login } from "./pages/Login";
+import { PurchaseSuccess } from "./pages/PurchaseSuccess";
 
 // Componente que detecta session_id en el hash de la URL
 // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
