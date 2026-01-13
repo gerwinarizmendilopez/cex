@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('vclub_token');
+    localStorage.removeItem('home_token');
   };
 
   return (
