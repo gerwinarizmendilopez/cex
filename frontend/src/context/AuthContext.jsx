@@ -24,30 +24,27 @@ export const AuthProvider = ({ children }) => {
     
     if (storedToken) {
       try {
+        // Verificar token JWT (sin credentials, usa header Authorization)
         const response = await axios.get(`${API}/auth/me`, {
           headers: { Authorization: `Bearer ${storedToken}` }
         });
         setUser(response.data);
         setToken(storedToken);
+        setLoading(false);
+        return;
       } catch (error) {
-        console.error('Token inválido, limpiando sesión:', error);
-        localStorage.removeItem('home_token');
-        setToken(null);
-        setUser(null);
-      }
-    } else {
-      // No hay token, intentar sesión de Google via cookie
-      try {
-        const googleResponse = await axios.get(`${API}/auth/google/me`, {
-          withCredentials: true
-        });
-        setUser(googleResponse.data);
-      } catch (googleError) {
-        // No hay sesión activa
-        setUser(null);
+        console.error('Token inválido:', error.response?.data || error.message);
+        // Solo limpiar si es un error de autenticación (401)
+        if (error.response?.status === 401) {
+          localStorage.removeItem('home_token');
+          setToken(null);
+          setUser(null);
+        }
       }
     }
     
+    // Si no hay token JWT válido, el usuario no está autenticado
+    // (La verificación de Google cookie se hará solo cuando sea necesario)
     setLoading(false);
   }, []);
 
@@ -91,11 +88,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const processGoogleSession = async (sessionId) => {
-    const response = await axios.post(
-      `${API}/auth/google/session`,
-      { session_id: sessionId },
-      { withCredentials: true }
-    );
+    const response = await axios.post(`${API}/auth/google/session`, { session_id: sessionId });
     
     const { access_token, user: userData } = response.data;
     
@@ -112,12 +105,6 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     // Limpiar localStorage PRIMERO
     localStorage.removeItem('home_token');
-    
-    try {
-      await axios.post(`${API}/auth/google/logout`, {}, { withCredentials: true });
-    } catch (error) {
-      // Ignorar errores de logout de Google
-    }
     
     setToken(null);
     setUser(null);
