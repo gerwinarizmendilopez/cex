@@ -1,18 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Check, Download, Shield, Music2, Clock, Gauge, Sparkles, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Check, Download, Shield, Music2, Clock, Gauge, Sparkles, ShoppingCart, Play, Pause } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { AudioPlayer } from '../components/AudioPlayer';
-import { mockBeats, licenseTypes } from '../mock';
 import { toast } from 'sonner';
 import { useCart } from '../context/CartContext';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL + '/api';
+
+// Tipos de licencia
+const licenseTypes = {
+  basica: {
+    name: 'Licencia Básica',
+    features: [
+      'Archivo MP3 de alta calidad',
+      'Uso en streaming (Spotify, Apple Music, etc.)',
+      'Hasta 500,000 streams',
+      'Uso en YouTube (sin monetización)',
+      'Créditos requeridos al productor'
+    ]
+  },
+  premium: {
+    name: 'Licencia Premium',
+    features: [
+      'Archivos WAV + MP3 + Stems',
+      'Uso ilimitado en streaming',
+      'Monetización en YouTube permitida',
+      'Hasta 1 video musical',
+      'Uso en radio y TV local',
+      'Distribución en tiendas digitales'
+    ]
+  },
+  exclusiva: {
+    name: 'Licencia Exclusiva',
+    features: [
+      'Todos los archivos del proyecto',
+      'Derechos exclusivos del beat',
+      'El beat se retira del catálogo',
+      'Uso comercial ilimitado',
+      'Sin límite de streams o ventas',
+      'Transferencia de derechos incluida'
+    ]
+  }
+};
 
 export const BeatDetail = () => {
   const { id } = useParams();
-  const beat = mockBeats.find(b => b.id === id);
+  const [beat, setBeat] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedLicense, setSelectedLicense] = useState('basica');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
   const { addToCart, isInCart } = useCart();
+
+  useEffect(() => {
+    fetchBeat();
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [id]);
+
+  const fetchBeat = async () => {
+    try {
+      const response = await axios.get(`${API}/beats/${id}`);
+      setBeat(response.data);
+    } catch (error) {
+      console.error('Error cargando beat:', error);
+      toast.error('Error al cargar el beat');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlayPause = async () => {
+    if (!beat) return;
+
+    if (isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setIsPlaying(false);
+    } else {
+      if (!audioRef.current) {
+        const audioUrl = `${API}/beats/audio/${beat.audio_url.split('/').pop()}`;
+        audioRef.current = new Audio(audioUrl);
+        audioRef.current.onended = () => setIsPlaying(false);
+        audioRef.current.onerror = () => {
+          toast.error('Error al reproducir el audio');
+          setIsPlaying(false);
+        };
+      }
+      
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+        // Registrar play
+        axios.post(`${API}/beats/${beat.beat_id}/play`).catch(() => {});
+      } catch (error) {
+        toast.error('Error al reproducir');
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white pt-24 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+      </div>
+    );
+  }
 
   if (!beat) {
     return (
@@ -27,17 +126,29 @@ export const BeatDetail = () => {
     );
   }
 
+  // Preparar datos del beat para el carrito
+  const beatForCart = {
+    id: beat.beat_id,
+    name: beat.name,
+    coverImage: `${API}/beats/cover/${beat.cover_url.split('/').pop()}`,
+    prices: {
+      basica: beat.price_basica,
+      premium: beat.price_premium,
+      exclusiva: beat.price_exclusiva
+    }
+  };
+
+  const handleAddToCart = () => {
+    addToCart(beatForCart, selectedLicense);
+  };
+
   const handlePurchase = () => {
     toast.success(`¡Compra simulada! Beat "${beat.name}" con licencia ${licenseTypes[selectedLicense].name}`, {
       description: 'En producción, esto procesará el pago real y enviará el beat por email.'
     });
   };
 
-  const handleAddToCart = () => {
-    addToCart(beat, selectedLicense);
-  };
-
-  const inCart = isInCart(beat.id, selectedLicense);
+  const inCart = isInCart(beat.beat_id, selectedLicense);
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20">
@@ -53,19 +164,43 @@ export const BeatDetail = () => {
           <div>
             <div className="relative rounded-xl overflow-hidden mb-6">
               <img 
-                src={beat.coverImage} 
+                src={`${API}/beats/cover/${beat.cover_url.split('/').pop()}`}
                 alt={beat.name}
                 className="w-full h-96 object-cover"
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/400x400?text=🎵';
+                }}
               />
               <div className="absolute top-4 left-4">
                 <span className="px-3 py-1 bg-red-600 text-white text-sm font-semibold rounded-full">
                   {beat.genre}
                 </span>
               </div>
+              {/* Play Button Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                <Button 
+                  size="lg"
+                  className={`rounded-full w-20 h-20 ${isPlaying ? 'bg-white text-black hover:bg-gray-200' : 'bg-red-600 hover:bg-red-700'}`}
+                  onClick={handlePlayPause}
+                >
+                  {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
+                </Button>
+              </div>
+              {/* Playing Indicator */}
+              {isPlaying && (
+                <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-2 bg-red-600 rounded-full">
+                  <div className="flex gap-0.5">
+                    <span className="w-1 h-4 bg-white rounded-full animate-pulse"></span>
+                    <span className="w-1 h-6 bg-white rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></span>
+                    <span className="w-1 h-3 bg-white rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></span>
+                  </div>
+                  <span className="text-sm text-white font-medium">Reproduciendo...</span>
+                </div>
+              )}
             </div>
 
             <h1 className="text-4xl font-bold mb-4">{beat.name}</h1>
-            <p className="text-gray-400 mb-6">Por {beat.producer}</p>
+            <p className="text-gray-400 mb-6">Por HØME Records</p>
 
             {/* Beat Stats */}
             <div className="grid grid-cols-4 gap-4 mb-8">
@@ -81,8 +216,8 @@ export const BeatDetail = () => {
               </div>
               <div className="bg-zinc-900 border border-red-900/20 rounded-lg p-4 text-center">
                 <Clock className="w-5 h-5 text-red-500 mx-auto mb-2" />
-                <div className="text-lg font-bold">{beat.duration}</div>
-                <div className="text-xs text-gray-400">Duración</div>
+                <div className="text-lg font-bold">{(beat.plays || 0).toLocaleString()}</div>
+                <div className="text-xs text-gray-400">Plays</div>
               </div>
               <div className="bg-zinc-900 border border-red-900/20 rounded-lg p-4 text-center">
                 <Sparkles className="w-5 h-5 text-red-500 mx-auto mb-2" />
@@ -91,24 +226,19 @@ export const BeatDetail = () => {
               </div>
             </div>
 
-            {/* Audio Player */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Escucha el Preview</h3>
-              <AudioPlayer src={beat.audioPreviewUrl} beatName={beat.name} />
-            </div>
-
             {/* Tags */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">Etiquetas</h3>
               <div className="flex flex-wrap gap-2">
-                {beat.tags.map((tag, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-red-950/30 border border-red-900/30 text-red-400 text-sm rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+                <span className="px-3 py-1 bg-red-950/30 border border-red-900/30 text-red-400 text-sm rounded-full">
+                  #{beat.genre.toLowerCase()}
+                </span>
+                <span className="px-3 py-1 bg-red-950/30 border border-red-900/30 text-red-400 text-sm rounded-full">
+                  #{beat.mood.toLowerCase()}
+                </span>
+                <span className="px-3 py-1 bg-red-950/30 border border-red-900/30 text-red-400 text-sm rounded-full">
+                  #{beat.bpm}bpm
+                </span>
               </div>
             </div>
           </div>
@@ -135,7 +265,7 @@ export const BeatDetail = () => {
                         <p className="text-sm text-gray-400 mt-1">Para lanzamientos digitales</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-red-500">${beat.prices.basica}</div>
+                        <div className="text-3xl font-bold text-red-500">${beat.price_basica}</div>
                       </div>
                     </div>
                   </CardHeader>
@@ -170,7 +300,7 @@ export const BeatDetail = () => {
                         <p className="text-sm text-gray-400 mt-1">Para artistas serios</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-red-500">${beat.prices.premium}</div>
+                        <div className="text-3xl font-bold text-red-500">${beat.price_premium}</div>
                       </div>
                     </div>
                   </CardHeader>
@@ -202,7 +332,7 @@ export const BeatDetail = () => {
                         <p className="text-sm text-gray-400 mt-1">Derechos completos</p>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-red-500">${beat.prices.exclusiva}</div>
+                        <div className="text-3xl font-bold text-red-500">${beat.price_exclusiva}</div>
                       </div>
                     </div>
                   </CardHeader>
@@ -226,7 +356,7 @@ export const BeatDetail = () => {
                 disabled={inCart}
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
-                {inCart ? 'Ya está en el carrito' : `Añadir al Carrito - $${beat.prices[selectedLicense]}`}
+                {inCart ? 'Ya está en el carrito' : `Añadir al Carrito - $${beat[`price_${selectedLicense}`]}`}
               </Button>
 
               <Button 
@@ -236,7 +366,7 @@ export const BeatDetail = () => {
                 onClick={handlePurchase}
               >
                 <Download className="w-5 h-5 mr-2" />
-                Comprar Ahora - ${beat.prices[selectedLicense]}
+                Comprar Ahora - ${beat[`price_${selectedLicense}`]}
               </Button>
 
               <div className="mt-6 p-4 bg-zinc-900 border border-red-900/20 rounded-lg">
